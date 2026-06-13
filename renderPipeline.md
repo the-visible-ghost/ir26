@@ -1,3 +1,5 @@
 # Master Filtering Pipeline ->
-- # Sanity + Honeypot Detection
+- ### Sanity + Honeypot Detection
   - don't care about the candidate, just make sure the profile is realistically valid and internally consistent.
+  - the checks--
+      - Experience vs Career History
