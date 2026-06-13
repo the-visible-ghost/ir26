@@ -2,11 +2,27 @@ OUTPUT_PATH = "./submission.csv"
 CANDIDATES_FILE = "./candidates.jsonl"
 IS_GZIPPED = False
 
+DEBUG = True
+
 
 def main():
+    if DEBUG:
+        print(
+            f"{OUTPUT_PATH = }", f"{CANDIDATES_FILE = }", f"{IS_GZIPPED = }", sep="\n"
+        )
+
+    import json
+    import gzip
     from csv import writer as csv_writer
 
-    print(f"{OUTPUT_PATH = }", f"{CANDIDATES_FILE = }", f"{IS_GZIPPED = }", sep="\n")
+    with (
+        gzip.open("data.json.gz", "rt") if IS_GZIPPED else open(CANDIDATES_FILE, "r")
+    ) as fp:
+        json_data = (json.loads(line) for line in fp)
+
+    # import Candidate from candidate
+
+    # data = (Candidate.from_json(x) for x in json_data)
 
 
 if __name__ == "__main__":
@@ -23,6 +39,8 @@ if __name__ == "__main__":
             "                           Defaults to " + CANDIDATES_FILE + "\n",
             "   --gzipped               Use ONLY if the candidates files is gzipped and needs inline de-compression",
             "                           Default to " + str(IS_GZIPPED) + "\n",
+            "   --debug                 Enable debug mode (verbose logging)",
+            "                           Default to " + str(DEBUG) + "\n",
             sep="\n",
         )
         exit(0)
@@ -48,5 +66,8 @@ if __name__ == "__main__":
 
     if "--gzipped" in sys.argv:
         IS_GZIPPED = True
+
+    if "--debug" in sys.argv:
+        DEBUG = True
 
     main()
