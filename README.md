@@ -17,7 +17,7 @@ Source `.bat` or `.fish` or `.zsh` etc file based on your shell.
 source .venv/bin/activate
 ```
 
-## 2. Installing dependencies
+## 3. Installing dependencies
 ```bash
 pip install -r requirements.txt
 ```
