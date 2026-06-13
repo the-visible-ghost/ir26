@@ -4,9 +4,9 @@ Wrapper for Candidate JSON-Object
 
 # TODO: Writing from_json method for each class
 
-from dataclasses import dataclass
 from typing import Dict, List, Literal, Optional
 import datetime as dt
+import msgspec
 
 type CompanySize = Literal[
     "1-10",
@@ -25,8 +25,7 @@ type LanguageProficiency = Literal["basic", "conversational", "professional", "n
 type WorkMode = Literal["remote", "hybrid", "onsite", "flexible"]
 
 
-@dataclass(slots=True)
-class Profile:
+class Profile(msgspec.Struct):
     anonymized_name: str
     headline: str
     summary: str
@@ -39,21 +38,19 @@ class Profile:
     current_industry: str
 
 
-@dataclass(slots=True)
-class Career:
+class Career(msgspec.Struct):
     company: str
     title: str
     start_date: dt.date
     end_date: Optional[dt.date]
     duration_months: int
-    is_currnt: bool
+    is_current: bool
     industry: str
     company_size: CompanySize
     description: str
 
 
-@dataclass(slots=True)
-class Education:
+class Education(msgspec.Struct):
     institution: str
     degree: str
     field_of_study: str
@@ -63,29 +60,25 @@ class Education:
     tier: EducationTier
 
 
-@dataclass(slots=True)
-class Skill:
+class Skill(msgspec.Struct):
     name: str
     proficiency: SkillProficiency
     endorsements: int
     duration_months: int
 
 
-@dataclass(slots=True)
-class Certification:
+class Certification(msgspec.Struct):
     name: str
     issuer: str
     year: int
 
 
-@dataclass(slots=True)
-class Language:
+class Language(msgspec.Struct):
     language: str
     proficiency: LanguageProficiency
 
 
-@dataclass(slots=True)
-class RedrobSignals:
+class RedrobSignals(msgspec.Struct):
     profile_completeness_score: float
     signup_date: dt.date
     last_active_date: dt.date
@@ -94,9 +87,9 @@ class RedrobSignals:
     applications_submitted_30d: int
     recruiter_response_rate: float
     avg_response_time_hours: float
-    skill_assessment_score: Dict[str, int]
+    skill_assessment_scores: Dict[str, float]
     connection_count: int
-    endorsements_reciever: int
+    endorsements_received: int
     notice_period_days: int
     expected_salary_range_inr_lpa: Dict[Literal["min", "max"], float]
     preferred_work_mode: WorkMode
@@ -111,8 +104,7 @@ class RedrobSignals:
     linkedin_connected: bool
 
 
-@dataclass(slots=True)
-class Candidate:
+class Candidate(msgspec.Struct):
     candidate_id: str
     profile: Profile
     career_history: List[Career]

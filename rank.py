@@ -11,18 +11,23 @@ def main():
             f"{OUTPUT_PATH = }", f"{CANDIDATES_FILE = }", f"{IS_GZIPPED = }", sep="\n"
         )
 
-    import json
     import gzip
-    from csv import writer as csv_writer
+    import msgspec
 
-    with (
-        gzip.open("data.json.gz", "rt") if IS_GZIPPED else open(CANDIDATES_FILE, "r")
-    ) as fp:
-        json_data = (json.loads(line) for line in fp)
+    from candidate import Candidate
 
-    # import Candidate from candidate
+    if DEBUG:
+        print("Loading Candidates data")
 
-    # data = (Candidate.from_json(x) for x in json_data)
+    fp = gzip.open("data.json.gz", "rb") if IS_GZIPPED else open(CANDIDATES_FILE, "rb")
+    data = (msgspec.json.decode(line, type=Candidate) for line in fp)
+
+    if DEBUG:
+        print("Candidates json data loaded")
+
+    print(next(data))
+
+    fp.close()
 
 
 if __name__ == "__main__":
