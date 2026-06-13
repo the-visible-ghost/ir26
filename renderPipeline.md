@@ -1,8 +1,9 @@
 # Master Filtering Pipeline ->
-- take a ranking of suspiciousness and map it to all candidates, increment if they fail the checks listed below.
-- ### Sanity + Honeypot Detection
+> - ### take a ranking of suspiciousness and map it to all candidates, increment if they fail the checks listed below.
+> - ![>](https://img.shields.io/badge/TODO-blue) {add additional checks defn}
+- ## Sanity + Honeypot Detection
   - don't care about the candidate, just make sure the profile is realistically valid and internally consistent.
-  - the checks--
+  - ###Checks--
       - Experience vs Career History
         > match the total career jobs duration with the claimed experience
         
