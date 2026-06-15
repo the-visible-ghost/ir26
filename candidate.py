@@ -2,8 +2,6 @@
 Wrapper for Candidate JSON-Object
 """
 
-# TODO: Writing from_json method for each class
-
 from typing import Dict, List, Literal, Optional
 import datetime as dt
 import msgspec

@@ -1,3 +1,4 @@
 sample/candidates.jsonl
 .venv
 **/__pycache__/**
+.ipynb_checkpoints

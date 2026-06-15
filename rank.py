@@ -2,28 +2,28 @@ OUTPUT_PATH = "./submission.csv"
 CANDIDATES_FILE = "./candidates.jsonl"
 IS_GZIPPED = False
 
-DEBUG = True
+DEBUG = False
+
+
+def debug_print(*args, **kwargs):
+    if not DEBUG:
+        return
+    print("[DEBUG] :", *args, **kwargs)
 
 
 def main():
-    if DEBUG:
-        print(
-            f"{OUTPUT_PATH = }", f"{CANDIDATES_FILE = }", f"{IS_GZIPPED = }", sep="\n"
-        )
+    debug_print("Loading Candidates data")
 
     import gzip
-    import msgspec
-
-    from candidate import Candidate
-
-    if DEBUG:
-        print("Loading Candidates data")
 
     fp = gzip.open("data.json.gz", "rb") if IS_GZIPPED else open(CANDIDATES_FILE, "rb")
+
+    import msgspec
+    from candidate import Candidate
+
     data = (msgspec.json.decode(line, type=Candidate) for line in fp)
 
-    if DEBUG:
-        print("Candidates json data loaded")
+    debug_print("Candidates data loaded")
 
     print(next(data))
 
