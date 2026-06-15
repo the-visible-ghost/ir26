@@ -16,7 +16,7 @@ def main():
 
     import gzip
 
-    fp = gzip.open("data.json.gz", "rb") if IS_GZIPPED else open(CANDIDATES_FILE, "rb")
+    fp = gzip.open(CANDIDATES_FILE, "rb") if IS_GZIPPED else open(CANDIDATES_FILE, "rb")
 
     import msgspec
     from candidate import Candidate
