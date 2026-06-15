@@ -1,1 +1,5 @@
 msgspec
+numpy
+fastembed
+scikit-learn
+faiss-cpu

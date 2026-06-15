@@ -1,3 +1,7 @@
+from utils import embedding
+import utils
+
+
 OUTPUT_PATH = "./submission.csv"
 CANDIDATES_FILE = "./candidates.jsonl"
 IS_GZIPPED = False
@@ -25,7 +29,15 @@ def main():
 
     debug_print("Candidates data loaded")
 
-    print(next(data))
+    from utils import job_desc
+    from utils.embedding import Embedder
+
+    embedder = Embedder("BAAI/bge-small-en-v1.5")
+
+    JD = {
+        section: embedder.embed(content)
+        for section, content in job_desc.processed.items()
+    }
 
     fp.close()
 
