@@ -1,65 +1,72 @@
 # TODO: Re-check the processed JD and further optimize/correct wherever needed.
+
 # NOTE: Further atomize the content in some places if needed
+# The processed JD was written by ChatGPT
 
 processed = {
-    "must-have": [  # Core Match / Primary Retrieval Signal
-        "Senior AI Engineer role focused on production ML systems for ranking, retrieval, and candidate-job matching. ",
-        "Strong experience required in embeddings-based retrieval systems deployed in production (sentence-transformers, BGE, E5, OpenAI embeddings). ",
-        "Hands-on experience with vector databases or hybrid search systems such as FAISS, Milvus, Weaviate, Pinecone, Elasticsearch, or OpenSearch. ",
-        "Strong Python engineering ability with production-grade code quality. ",
-        "Experience designing evaluation frameworks for ranking systems including NDCG, MRR, MAP, offline-to-online evaluation, and A/B testing. ",
-        "Must have built and shipped end-to-end ranking, search, recommendation, or retrieval systems to real users. ",
-        "Experience must include production system ownership, embedding drift handling, index refresh strategies, and retrieval quality regression monitoring.",
+    "must_have": [
+        # Core identity of role (DO NOT split further)
+        "Senior AI Engineer role focused on production ML systems for ranking, retrieval, and candidate-job matching in a talent intelligence platform.",
+        # Embeddings + retrieval systems (single semantic unit each)
+        "Strong production experience building embeddings-based retrieval systems using models like sentence-transformers, BGE, E5, or OpenAI embeddings, deployed in real user-facing systems.",
+        "Hands-on experience designing and operating vector search or hybrid retrieval systems using FAISS, Milvus, Weaviate, Pinecone, Elasticsearch, or OpenSearch.",
+        # Core engineering requirement
+        "Strong Python engineering skills with production-grade software development practices and ownership of deployed ML systems.",
+        # Evaluation expertise (must stay grouped)
+        "Experience designing and owning ranking evaluation frameworks including NDCG, MRR, MAP, offline-to-online evaluation, and A/B testing for production ranking systems.",
+        # End-to-end system requirement (VERY important as single chunk)
+        "Proven experience building and shipping end-to-end ranking, search, recommendation, or retrieval systems that are deployed to real users.",
+        # Production ML operations (do not split drift + monitoring)
+        "Experience owning production ML retrieval systems including embedding drift handling, index refresh strategies, and monitoring retrieval quality regression.",
     ],
-    "retrieval": [  # ML System Depth / Technical Alignment Vector
-        "Deep expertise in modern machine learning systems including embeddings, dense and hybrid retrieval, ranking systems, and recommendation architectures. ",
-        "Experience with vector search, similarity search, and large-scale retrieval pipelines. ",
-        "Understanding of tradeoffs between BM25, dense embeddings, and hybrid retrieval systems. ",
-        "Knowledge of learning-to-rank approaches and ranking optimization strategies. ",
-        "Experience with distributed ML inference, scalable search systems, and production ML system design. ",
-        "Ability to design ranking systems that balance precision, recall, latency, and scalability.",
+    "core_ml_retrieval": [
+        "Deep expertise in modern ML retrieval systems including embeddings, dense retrieval, hybrid retrieval, ranking systems, and recommendation architectures.",
+        "Experience designing and scaling large-scale retrieval pipelines with attention to latency, recall, precision, and production constraints.",
+        "Understanding of tradeoffs between BM25 keyword search, dense embedding retrieval, and hybrid retrieval systems.",
+        "Experience with learning-to-rank systems and ranking optimization strategies in production.",
+        "Experience building distributed or large-scale ML inference systems for search and retrieval workloads.",
     ],
-    "evaluation": [  # Scientific Thinking / Quality Signal Vector
-        "Strong ability to design and interpret evaluation systems for ranking and retrieval. ",
-        "Experience with ranking metrics such as NDCG, MRR, MAP, precision-recall tradeoffs, and ranking correlation metrics. ",
-        "Ability to design offline evaluation pipelines and connect them to online A/B testing systems. ",
-        "Understanding of statistical validation of ranking improvements and experiment design. ",
-        "Experience building feedback loops from user behavior into ranking system improvements. ",
-        "Strong intuition for measurement, experimentation, and model/system iteration.",
+    "evaluation_ml_depth": [
+        "Strong ability to design evaluation systems for ranking and retrieval including offline evaluation pipelines and online A/B testing systems.",
+        "Deep understanding of ranking metrics such as NDCG, MRR, MAP, precision-recall tradeoffs, and ranking correlation metrics.",
+        "Experience building feedback loops from user behavior into ranking system improvements in production systems.",
+        "Ability to design statistically sound experiments and interpret ranking system improvements rigorously.",
+        "Strong intuition for measurement, experimentation, and iterative ML system improvement.",
     ],
-    "nice-to-have": [  # Expansion Vector / Optional Enrichment
-        "Experience with LLM fine-tuning techniques such as LoRA, QLoRA, and PEFT. ",
-        "Familiarity with retrieval-augmented generation (RAG) systems. ",
-        "Experience with learning-to-rank models including XGBoost-based rankers and neural ranking models. ",
-        "Exposure to HR-tech, recruiting platforms, or marketplace matching systems. ",
-        "Background in distributed systems, large-scale data pipelines, or inference optimization. ",
-        "Open-source contributions in machine learning or information retrieval systems.",
+    "nice_to_have": [
+        "Experience with LLM fine-tuning techniques such as LoRA, QLoRA, or PEFT.",
+        "Familiarity with retrieval-augmented generation (RAG) systems and hybrid LLM + retrieval pipelines.",
+        "Experience with learning-to-rank models including XGBoost-based rankers or neural ranking models.",
+        "Exposure to HR-tech, recruiting platforms, or marketplace matching systems.",
+        "Background in distributed systems, large-scale data pipelines, or inference optimization.",
+        "Open-source contributions in machine learning, search, or information retrieval systems.",
     ],
-    "execution": [  # Product Ship Culture Vector / Behavorial Alignment
-        "Ability to rapidly ship production systems with imperfect initial implementations and iterate based on real user feedback. ",
-        "Comfort working in fast-paced startup environments where systems evolve rapidly. ",
-        "Strong bias toward execution over research purity, with willingness to build v1 systems quickly. ",
-        "Experience working closely with product and operational teams to refine ML systems in production. ",
-        "Ability to work in ambiguous environments where requirements evolve continuously. ",
+    "execution_signal": [
+        "Ability to rapidly ship production systems in fast-moving environments, starting from imperfect implementations and iterating based on real user feedback.",
+        "Strong bias toward execution over research purity, with ability to build working v1 ranking systems quickly.",
+        "Experience working closely with product and operations teams to refine ML systems in production.",
+        "Comfort operating in ambiguous environments where requirements evolve continuously.",
         "Preference for practical engineering solutions over theoretical completeness in early-stage systems.",
     ],
-    "negative": [  # Disqualifiers / Rejection Criteria
-        "Career experience limited to IT consulting companies such as TCS, Infosys, Wipro, Accenture, Cognizant, Capgemini without product company ML exposure. ",
-        "Pure research-only experience without production deployment of ML or ranking systems. ",
-        "Recent experience limited to framework usage such as LangChain-based applications without deeper ML system ownership. ",
-        "Primary background in computer vision, speech processing, or robotics without NLP or information retrieval experience. ",
-        "Senior roles focused only on architecture or management without recent hands-on coding or system implementation. ",
-        "Work experience entirely in closed-source proprietary environments without external validation such as open-source work, talks, or publications.",
+    "negative_signals": [
+        "Career limited exclusively to IT consulting companies such as TCS, Infosys, Wipro, Accenture, Cognizant, or Capgemini without product ML experience.",
+        "Pure research-only background without production deployment of ML or ranking systems.",
+        "Recent experience limited to framework-based AI development such as LangChain wrappers without deeper ML system ownership.",
+        "Primary expertise in computer vision, speech, or robotics without significant NLP or information retrieval experience.",
+        "Senior-level roles focused only on architecture or management without recent hands-on coding or system implementation.",
+        "5+ years experience in closed-source proprietary environments without external validation (open-source, talks, publications).",
     ],
-    "context": [  # Role Reality Vector / Job Contraints + Expectations
-        "Full-time Senior AI Engineer role based in Pune or Noida with hybrid work model. ",
-        "Expected experience range is 5 to 9 years, with preference for 6 to 8 years in applied machine learning roles. ",
-        "Role involves ownership of ranking, retrieval, and candidate-job matching systems in a talent intelligence platform. ",
-        "Requires collaboration with product teams, recruiters, and engineering teams to design and iterate on ML systems. ",
-        "Fast-moving startup environment with evolving requirements and ambiguous problem definitions. ",
-        "Expectation of strong ownership, system thinking, and long-term commitment of 3+ years.",
+    "context": [
+        "Full-time Senior AI Engineer role based in Pune or Noida, India with hybrid work model and flexible office cadence.",
+        "Expected experience range is 5–9 years, with ideal range around 6–8 years in applied machine learning or production AI roles.",
+        "Role ownership includes ranking, retrieval, and candidate-job matching systems for a talent intelligence platform.",
+        "Close collaboration with product managers, recruiters, and engineering teams to design and iterate ML systems in production.",
+        "Fast-moving startup environment where systems evolve rapidly and ambiguity is expected.",
+        "Expectation of strong ownership mindset, system thinking ability, and long-term commitment of at least 3+ years.",
     ],
 }
+
+
 original = """
 Job Description: Senior AI Engineer
 Location: Pune/Noida, India (Hybrid — flexible cadence) | Open to relocation candidates from Tier-1 Indian cities 
