@@ -12,18 +12,18 @@ team_name: "Phantom Devs"  # Used in leaderboard and announcements
 primary_contact:
   name: "Harsh Verma"
   email: "harshverma1902008@gmail.com"   # Used for all organizer communication
-  phone: "+91-XXXXXXXXXX"        # Used for top-50 / top-10 outreach
+  phone: "+91-9406500995"        # Used for top-50 / top-10 outreach
 
 team_members:
   - name: "Khushank Dhote"
-    email: ""
+    email: "khushankdhote960@gmail.com"
     role: "Team Lead"          # Optional, e.g. "Team Lead", "Backend", "Data"
   - name: "Harsh Verma"
     email: "harshverma1902008@gmail.com"
-  - name: "Kashish Dhote",
-    email: ""
   - name: "Kushagra Vishwakarma"
     email: "kushagravishwakarma162007@gmail.com"
+  - name: "Kashish Dhote"
+    email: "kashishdhote2007@gmail.com"
   # Add more members as needed; solo participants list just one member
 
 # ============================================================================
@@ -48,12 +48,12 @@ reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submi
 compute:
   platform: "MacBook Pro M2"                    # Or: "AWS EC2 c5.4xlarge", "Local Linux box", etc.
   cpu_cores: 8                                  # Number of CPU cores used
-  ram_gb: 16                                    # Available RAM in GB
+  ram_gb: 12                                    # Available RAM in GB
   python_version: "3.11.4"                      # python --version
   os: "macOS 14.2"                              # Or "Ubuntu 22.04 LTS", etc.
   uses_gpu_for_inference: false                 # Must be false — see compute constraints
   has_network_during_ranking: false             # Must be false — no API calls during ranking
-  pre_computation_required: false               # true if you pre-compute embeddings or train models offline
+  pre_computation_required: true               # true if you pre-compute embeddings or train models offline
   pre_computation_time_minutes: 0               # Approximate, if applicable
 
 # ============================================================================
@@ -64,15 +64,14 @@ compute:
 # your code or your interview are flagged.
 ai_tools_used:
   - "ChatGPT"        # e.g. for architecture discussion, code review
-  - "Gemini"  # e.g. for autocomplete
   # Other options: "ChatGPT", "Cursor", "Gemini", "Codeium", "Other", "None"
 
 ai_usage_summary: |
   Briefly describe how AI tools were used. Examples:
-  - "Used Claude for code review and architectural discussion. Used Copilot for autocomplete.
+  - "Used ChatGPT for architectural discussion. No autocomplete used.
      No candidate data was fed to any LLM."
-  - "Used ChatGPT to debug Python issues and Cursor for refactoring."
-  - "No AI tools used."
+  - "Used ChatGPT to debug Python issues."
+  - "No AI tools except these were used."
 
 # ============================================================================
 # Approach summary (optional but recommended)
