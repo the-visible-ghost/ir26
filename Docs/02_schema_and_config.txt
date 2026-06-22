@@ -1,0 +1,527 @@
+# REDROB HACKATHON — SCHEMA & CONFIGURATION
+# File 2 of 4: JSON Schema, YAML Template, and Validation Script
+# ============================================
+
+# -----------------------------------------------------------------------------
+# SECTION A: candidate_schema.json — Candidate Profile JSON Schema
+# -----------------------------------------------------------------------------
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Redrob Candidate Profile Schema",
+  "description": "Schema for a single candidate profile in the Intelligent Candidate Discovery & Ranking Challenge dataset.",
+  "type": "object",
+  "required": [
+    "candidate_id",
+    "profile",
+    "career_history",
+    "education",
+    "skills",
+    "redrob_signals"
+  ],
+  "properties": {
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^CAND_[0-9]{7}$",
+      "description": "Unique identifier for the candidate. Format: CAND_XXXXXXX (7 digits)."
+    },
+    "profile": {
+      "type": "object",
+      "required": [
+        "anonymized_name",
+        "headline",
+        "summary",
+        "location",
+        "country",
+        "years_of_experience",
+        "current_title",
+        "current_company",
+        "current_company_size",
+        "current_industry"
+      ],
+      "properties": {
+        "anonymized_name": { "type": "string", "description": "Anonymized full name." },
+        "headline": { "type": "string", "description": "One-line professional headline." },
+        "summary": { "type": "string", "description": "Multi-sentence professional summary." },
+        "location": { "type": "string", "description": "City, region/state." },
+        "country": { "type": "string" },
+        "years_of_experience": { "type": "number", "minimum": 0, "maximum": 50 },
+        "current_title": { "type": "string" },
+        "current_company": { "type": "string" },
+        "current_company_size": {
+          "type": "string",
+          "enum": ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5001-10000", "10001+"]
+        },
+        "current_industry": { "type": "string" }
+      }
+    },
+    "career_history": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["company", "title", "start_date", "end_date", "duration_months", "is_current", "industry", "company_size", "description"],
+        "properties": {
+          "company": { "type": "string" },
+          "title": { "type": "string" },
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": ["string", "null"], "format": "date" },
+          "duration_months": { "type": "integer", "minimum": 0 },
+          "is_current": { "type": "boolean" },
+          "industry": { "type": "string" },
+          "company_size": {
+            "type": "string",
+            "enum": ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5001-10000", "10001+"]
+          },
+          "description": { "type": "string", "description": "Role responsibilities and achievements." }
+        }
+      }
+    },
+    "education": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["institution", "degree", "field_of_study", "start_year", "end_year"],
+        "properties": {
+          "institution": { "type": "string" },
+          "degree": { "type": "string" },
+          "field_of_study": { "type": "string" },
+          "start_year": { "type": "integer", "minimum": 1970, "maximum": 2030 },
+          "end_year": { "type": "integer", "minimum": 1970, "maximum": 2035 },
+          "grade": { "type": ["string", "null"], "description": "GPA / percentage / class." },
+          "tier": {
+            "type": "string",
+            "enum": ["tier_1", "tier_2", "tier_3", "tier_4", "unknown"],
+            "description": "Internal tiering for institution prestige."
+          }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "required": ["name", "proficiency", "endorsements"],
+        "properties": {
+          "name": { "type": "string" },
+          "proficiency": {
+            "type": "string",
+            "enum": ["beginner", "intermediate", "advanced", "expert"]
+          },
+          "endorsements": { "type": "integer", "minimum": 0 },
+          "duration_months": { "type": "integer", "minimum": 0, "description": "Months the candidate has used this skill" }
+        }
+      }
+    },
+    "certifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "issuer", "year"],
+        "properties": {
+          "name": { "type": "string" },
+          "issuer": { "type": "string" },
+          "year": { "type": "integer" }
+        }
+      }
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["language", "proficiency"],
+        "properties": {
+          "language": { "type": "string" },
+          "proficiency": {
+            "type": "string",
+            "enum": ["basic", "conversational", "professional", "native"]
+          }
+        }
+      }
+    },
+    "redrob_signals": {
+      "type": "object",
+      "description": "Simulated platform activity and engagement signals from the Redrob ecosystem.",
+      "required": [
+        "profile_completeness_score",
+        "signup_date",
+        "last_active_date",
+        "open_to_work_flag",
+        "profile_views_received_30d",
+        "applications_submitted_30d",
+        "recruiter_response_rate",
+        "avg_response_time_hours",
+        "skill_assessment_scores",
+        "connection_count",
+        "endorsements_received",
+        "notice_period_days",
+        "expected_salary_range_inr_lpa",
+        "preferred_work_mode",
+        "willing_to_relocate",
+        "github_activity_score",
+        "search_appearance_30d",
+        "saved_by_recruiters_30d",
+        "interview_completion_rate",
+        "offer_acceptance_rate",
+        "verified_email",
+        "verified_phone",
+        "linkedin_connected"
+      ],
+      "properties": {
+        "profile_completeness_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage of profile completeness."
+        },
+        "signup_date": { "type": "string", "format": "date" },
+        "last_active_date": { "type": "string", "format": "date" },
+        "open_to_work_flag": { "type": "boolean" },
+        "profile_views_received_30d": { "type": "integer", "minimum": 0 },
+        "applications_submitted_30d": { "type": "integer", "minimum": 0 },
+        "recruiter_response_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of recruiter messages the candidate has responded to."
+        },
+        "avg_response_time_hours": { "type": "number", "minimum": 0 },
+        "skill_assessment_scores": {
+          "type": "object",
+          "description": "Dict of skill_name -> score 0-100. Assessments completed on Redrob platform.",
+          "additionalProperties": { "type": "number", "minimum": 0, "maximum": 100 }
+        },
+        "connection_count": { "type": "integer", "minimum": 0 },
+        "endorsements_received": { "type": "integer", "minimum": 0 },
+        "notice_period_days": { "type": "integer", "minimum": 0, "maximum": 180 },
+        "expected_salary_range_inr_lpa": {
+          "type": "object",
+          "required": ["min", "max"],
+          "properties": {
+            "min": { "type": "number", "minimum": 0 },
+            "max": { "type": "number", "minimum": 0 }
+          },
+          "description": "Expected salary in INR Lakhs Per Annum."
+        },
+        "preferred_work_mode": {
+          "type": "string",
+          "enum": ["remote", "hybrid", "onsite", "flexible"]
+        },
+        "willing_to_relocate": { "type": "boolean" },
+        "github_activity_score": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 100,
+          "description": "0-100 score based on commits, PRs, stars in last 12 months. -1 if no GitHub linked."
+        },
+        "search_appearance_30d": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of times profile appeared in recruiter searches in last 30 days."
+        },
+        "saved_by_recruiters_30d": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of recruiters who saved this profile in last 30 days."
+        },
+        "interview_completion_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of scheduled interviews actually attended."
+        },
+        "offer_acceptance_rate": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Historical offer acceptance rate. -1 if no offer history."
+        },
+        "verified_email": { "type": "boolean" },
+        "verified_phone": { "type": "boolean" },
+        "linkedin_connected": { "type": "boolean" }
+      }
+    }
+  }
+}
+
+
+# -----------------------------------------------------------------------------
+# SECTION B: submission_metadata_template.yaml — Metadata Template
+# -----------------------------------------------------------------------------
+
+# Redrob Hackathon — Submission Metadata Template
+#
+# Copy this file to your repo root as `submission_metadata.yaml` and fill it in.
+# The fields here should match what you submit via the portal at upload time.
+# Stage 3 review uses this file to verify your portal metadata.
+
+# ============================================================================
+# Team identity
+# ============================================================================
+team_name: "your-team-name-here"  # Used in leaderboard and announcements
+
+primary_contact:
+  name: "Full Name"
+  email: "primary@example.com"   # Used for all organizer communication
+  phone: "+91-XXXXXXXXXX"        # Used for top-50 / top-10 outreach
+
+team_members:
+  - name: "Member 1 Full Name"
+    email: "member1@example.com"
+    role: "ML Engineer"          # Optional, e.g. "Team Lead", "Backend", "Data"
+  - name: "Member 2 Full Name"
+    email: "member2@example.com"
+    role: "Data Engineer"
+  # Add more members as needed; solo participants list just one member
+
+# ============================================================================
+# Code and reproducibility
+# ============================================================================
+github_repo: "https://github.com/YOUR_USERNAME/YOUR_REPO"
+# Required. Must be reachable. Private repos OK if you can grant organizer
+# access at Stage 3 (the email to add will be communicated then).
+
+sandbox_link: "https://huggingface.co/spaces/YOUR_USERNAME/redrob-ranker"
+# Required. A working hosted environment where the ranker can be run on a small
+# candidate sample. See Section 10.5 of submission_spec.md for acceptable
+# platforms (HuggingFace Spaces, Streamlit Cloud, Replit, Colab, Docker, Binder).
+
+reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
+# The single command that produces submission.csv from candidates.jsonl.
+# Should run end-to-end within 5 minutes on CPU with 16GB RAM and no network.
+
+# ============================================================================
+# Compute environment
+# ============================================================================
+compute:
+  platform: "MacBook Pro M2"                    # Or: "AWS EC2 c5.4xlarge", "Local Linux box", etc.
+  cpu_cores: 8                                  # Number of CPU cores used
+  ram_gb: 16                                    # Available RAM in GB
+  python_version: "3.11.4"                      # python --version
+  os: "macOS 14.2"                              # Or "Ubuntu 22.04 LTS", etc.
+  uses_gpu_for_inference: false                 # Must be false — see compute constraints
+  has_network_during_ranking: false             # Must be false — no API calls during ranking
+  pre_computation_required: false               # true if you pre-compute embeddings or train models offline
+  pre_computation_time_minutes: 0               # Approximate, if applicable
+
+# ============================================================================
+# AI tools declaration
+# ============================================================================
+# Transparency only — declared use is NOT penalized. Be honest. Stage 5 interview
+# may verify these declarations against your code; declarations that contradict
+# your code or your interview are flagged.
+ai_tools_used:
+  - "Claude"        # e.g. for architecture discussion, code review
+  - "GitHub Copilot"  # e.g. for autocomplete
+  # Other options: "ChatGPT", "Cursor", "Gemini", "Codeium", "Other", "None"
+
+ai_usage_summary: |
+  Briefly describe how AI tools were used. Examples:
+  - "Used Claude for code review and architectural discussion. Used Copilot for autocomplete.
+     No candidate data was fed to any LLM."
+  - "Used ChatGPT to debug Python issues and Cursor for refactoring."
+  - "No AI tools used."
+
+# ============================================================================
+# Approach summary (optional but recommended)
+# ============================================================================
+methodology_summary: |
+  ≤200 word summary of your approach. Strongly recommended.
+
+  Example:
+  "Rule-based ranker with explicit reasoning capture. Five scoring components
+  (skills, title+career, experience years, location, education) combined with
+  a multiplicative behavioral-signal modifier. The title component is the
+  decisive signal against keyword-stuffer traps; an endorsement-and-duration
+  trust multiplier on skills catches lazy keyword stuffing. Runtime is ~10
+  seconds for 50K candidates on CPU."
+
+# ============================================================================
+# Declarations
+# ============================================================================
+declarations:
+  read_submission_spec: true        # I have read submission_spec.md in full
+  code_is_original_work: true       # My code is my team's original work (using AI as a tool is fine)
+  no_collusion: true                # I have not coordinated my submission with other teams
+  honeypot_check_done: false        # OPTIONAL — set true if you explicitly checked for honeypots in your ranking
+  reproduction_tested: true         # I have tested that my reproduce_command runs end-to-end
+
+
+# -----------------------------------------------------------------------------
+# SECTION C: validate_submission.py — Submission Format Validator
+# -----------------------------------------------------------------------------
+
+#!/usr/bin/env python3
+"""
+Validate submission CSV per challenge rules (sections 2–3).
+Row 1 = header. Rows 2–101 = exactly 100 data rows. CSV only.
+"""
+
+import csv
+import re
+import sys
+from pathlib import Path
+
+REQUIRED_HEADER = ["candidate_id", "rank", "score", "reasoning"]
+CANDIDATE_ID_PATTERN = re.compile(r"^CAND_[0-9]{7}$")
+DATA_ROW_START = 2
+EXPECTED_DATA_ROWS = 100
+
+
+def validate_submission(csv_path):
+    errors = []
+    path = Path(csv_path)
+
+    if path.suffix.lower() != ".csv":
+        errors.append("Filename must use a .csv extension.")
+    elif not path.stem:
+        errors.append("Filename must be your registered participant ID (e.g. team_xxx.csv).")
+
+    try:
+        with open(path, "r", encoding="utf-8", newline="") as f:
+            reader = csv.reader(f)
+
+            try:
+                header = next(reader)
+            except StopIteration:
+                errors.append("Row 1 must be the header row; file is empty.")
+                return errors
+
+            # Row 1: column names and their order come from this line only
+            if header != REQUIRED_HEADER:
+                errors.append(
+                    "Row 1 (header) must be exactly:\n"
+                    f"  {','.join(REQUIRED_HEADER)}\n"
+                    f"Found:\n"
+                    f"  {','.join(header)}"
+                )
+
+            data_rows = []
+            for row in reader:
+                if any(cell.strip() for cell in row):
+                    data_rows.append(row)
+
+    except UnicodeDecodeError:
+        errors.append("File must be UTF-8 encoded.")
+        return errors
+    except OSError as e:
+        errors.append(f"Cannot read file: {e}")
+        return errors
+
+    n = len(data_rows)
+    if n != EXPECTED_DATA_ROWS:
+        errors.append(
+            f"After the header (row 1), there must be exactly {EXPECTED_DATA_ROWS} "
+            f"data rows (rows {DATA_ROW_START}–{DATA_ROW_START + EXPECTED_DATA_ROWS - 1}); "
+            f"found {n}."
+        )
+
+    seen_ids = set()
+    seen_ranks = set()
+    by_rank = []
+
+    for i, cells in enumerate(data_rows):
+        row_num = DATA_ROW_START + i
+
+        if len(cells) != len(REQUIRED_HEADER):
+            errors.append(
+                f"Row {row_num}: expected {len(REQUIRED_HEADER)} columns "
+                f"({','.join(REQUIRED_HEADER)}), got {len(cells)}."
+            )
+            continue
+
+        row = dict(zip(REQUIRED_HEADER, cells))
+        cid = row["candidate_id"].strip()
+        rank_s = row["rank"].strip()
+        score_s = row["score"].strip()
+
+        if not cid:
+            errors.append(f"Row {row_num}: candidate_id is required.")
+        elif not CANDIDATE_ID_PATTERN.match(cid):
+            errors.append(
+                f"Row {row_num}: candidate_id must be CAND_XXXXXXX (7 digits)."
+            )
+        elif cid in seen_ids:
+            errors.append(f"Row {row_num}: duplicate candidate_id '{cid}'.")
+        else:
+            seen_ids.add(cid)
+
+        try:
+            rank = int(rank_s)
+            if str(rank) != rank_s:
+                raise ValueError
+            if not 1 <= rank <= 100:
+                errors.append(f"Row {row_num}: rank must be between 1 and 100.")
+            elif rank in seen_ranks:
+                errors.append(f"Row {row_num}: duplicate rank {rank}.")
+            else:
+                seen_ranks.add(rank)
+        except ValueError:
+            errors.append(f"Row {row_num}: rank must be an integer (1–100).")
+            rank = None
+
+        try:
+            score = float(score_s)
+        except ValueError:
+            errors.append(f"Row {row_num}: score must be a float.")
+            score = None
+
+        if rank is not None and score is not None and cid:
+            by_rank.append((rank, score, cid))
+
+    missing = set(range(1, 101)) - seen_ranks
+    if missing:
+        errors.append(
+            f"Each rank 1–100 must appear exactly once; missing: {sorted(missing)}"
+        )
+
+    by_rank.sort(key=lambda x: x[0])
+
+    for i in range(len(by_rank) - 1):
+        r1, s1, _ = by_rank[i]
+        r2, s2, _ = by_rank[i + 1]
+        if s1 < s2:
+            errors.append(
+                f"score must be non-increasing by rank: "
+                f"rank {r1} ({s1}) < rank {r2} ({s2})."
+            )
+
+    for i in range(len(by_rank) - 1):
+        r1, s1, c1 = by_rank[i]
+        r2, s2, c2 = by_rank[i + 1]
+        if s1 == s2 and c1 > c2:
+            errors.append(
+                f"Equal scores at ranks {r1} and {r2}: "
+                f"tie-break requires candidate_id ascending "
+                f"({c1!r} > {c2!r})."
+            )
+
+    return errors
+
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python validate_submission.py <participant_id>.csv")
+        sys.exit(1)
+
+    errors = validate_submission(sys.argv[1])
+    if errors:
+        print(f"Validation failed ({len(errors)} issue(s)):\n")
+        for e in errors:
+            print(f"- {e}")
+        sys.exit(1)
+
+    print("Submission is valid.")
+
+
+if __name__ == "__main__":
+    main()
+
+
+# ============================================
+# END OF FILE 2: Schema & Configuration Files
+# ============================================
