@@ -1,6 +1,7 @@
 import re
 import numpy as np
 from typing import Dict, List
+from .candidate import Candidate
 
 
 # =============================================================================
@@ -203,21 +204,21 @@ def cluster_skills(skill_names: list[str]) -> dict[str, list[str]]:
 # =============================================================================
 
 
-def extract_sentences(candidate: dict) -> List[str]:
+def extract_sentences(candidate: Candidate) -> List[str]:
     """
     Extract clean sentences from candidate profile text.
     Sources: headline, summary, career descriptions.
     """
     sentences = []
-    profile = candidate.get("profile", {})
+    profile = candidate.profile
 
     # Headline
-    headline = profile.get("headline", "").strip()
+    headline = profile.headline.strip()
     if headline and len(headline) > 10:
         sentences.append(headline)
 
     # Summary sentences
-    summary = profile.get("summary", "").strip()
+    summary = profile.summary.strip()
     if summary:
         for sent in re.split(r"(?<=[.!?])\s+", summary):
             sent = sent.strip()
@@ -225,8 +226,8 @@ def extract_sentences(candidate: dict) -> List[str]:
                 sentences.append(sent)
 
     # Career description sentences
-    for career in candidate.get("career_history", []):
-        desc = career.get("description", "").strip()
+    for career in candidate.career_history:
+        desc = career.description.strip()
         if desc:
             for sent in re.split(r"(?<=[.!?])\s+", desc):
                 sent = sent.strip()
@@ -321,12 +322,12 @@ def find_evidence(sentences: List[str], cluster: str, top_k: int = 3) -> List[st
 # =============================================================================
 
 
-def cluster_skills_with_evidence(candidate: dict) -> Dict[str, Dict]:
+def cluster_skills_with_evidence(candidate: Candidate) -> Dict[str, Dict]:
     """
     Cluster candidate skills into domains with description and evidence.
 
     Args:
-        candidate: Full candidate dict (matches msgspec schema)
+        candidate: Candidate object
 
     Returns:
         {cluster_name: {"description": str, "skills": [str], "evidence": [str]}}
@@ -336,8 +337,8 @@ def cluster_skills_with_evidence(candidate: dict) -> Dict[str, Dict]:
 
     # Cluster skills by domain
     clusters = {cluster: [] for cluster in SKILL_CLUSTER_MAP}
-    for skill in candidate.get("skills", []):
-        name = skill.get("name", "")
+    for skill in candidate.skills:
+        name = skill.name
         cluster = SKILL_TO_CLUSTER.get(name)
         if cluster:
             clusters[cluster].append(name)
