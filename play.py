@@ -1,7 +1,3 @@
-from utils import embedding
-import utils
-
-
 OUTPUT_PATH = "./submission.csv"
 CANDIDATES_FILE = "./candidates.jsonl"
 IS_GZIPPED = False
@@ -25,19 +21,33 @@ def main():
     import msgspec
     from utils.candidate import Candidate
 
-    data = (msgspec.json.decode(line, type=Candidate) for line in fp)
+    data = [msgspec.json.decode(line, type=Candidate) for line in fp]
 
     debug_print("Candidates data loaded")
 
     from utils import job_desc
     from utils.embedding import Embedder
 
-    embedder = Embedder("BAAI/bge-small-en-v1.5")
+    # embedder = Embedder("BAAI/bge-small-en-v1.5")
 
-    JD = {
-        section: embedder.embed(content)
-        for section, content in job_desc.processed.items()
-    }
+    # JD = {
+    #     section: embedder.embed(content)
+    #     for section, content in job_desc.processed.items()
+    # }
+
+    # summaries = [
+    #     (
+    #         f"I am a {c.profile.current_title}"
+    #         f" at {c.profile.current_company}"
+    #         f" in {c.profile.current_industry} industry."
+    #         f" {c.profile.summary}"
+    #     )
+    #     for c in data
+    # ]
+
+    import json
+
+    print(json.dumps(data[0].embed_data, indent=4))
 
     fp.close()
 

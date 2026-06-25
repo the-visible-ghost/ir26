@@ -6,6 +6,8 @@ from typing import Dict, List, Literal, Optional
 import datetime as dt
 import msgspec
 
+from utils.skill_cluster import gen_skill_cluster
+
 type CompanySize = Literal[
     "1-10",
     "11-50",
@@ -21,6 +23,10 @@ type EducationTier = Literal["tier_1", "tier_2", "tier_3", "tier_4", "unknown"]
 type SkillProficiency = Literal["beginner", "intermediate", "advanced", "expert"]
 type LanguageProficiency = Literal["basic", "conversational", "professional", "native"]
 type WorkMode = Literal["remote", "hybrid", "onsite", "flexible"]
+
+type CandidateEmbedData = Dict[
+    Literal["summary", "skills", "experience"], str | List[str]
+]
 
 
 class Profile(msgspec.Struct):
@@ -47,6 +53,10 @@ class Career(msgspec.Struct):
     company_size: CompanySize
     description: str
 
+    @property
+    def embed_str(self) -> str:
+        raise NotImplementedError
+
 
 class Education(msgspec.Struct):
     institution: str
@@ -63,6 +73,24 @@ class Skill(msgspec.Struct):
     proficiency: SkillProficiency
     endorsements: int
     duration_months: int
+
+    @property
+    def embed_str(self) -> str:
+        return (
+            f"{self.proficiency} proficiency in "
+            f"{self.name} with "
+            f"{self.duration_months} months of experience"
+        )
+
+
+class SkillCluster(msgspec.Struct):
+    name: str
+    skills: List[Skill]
+
+    @property
+    def embed_str(self) -> str:
+        skills = "\n".join(" - " + skill.embed_str for skill in self.skills)
+        return f"{self.name}:\n{skills}"
 
 
 class Certification(msgspec.Struct):
@@ -111,3 +139,23 @@ class Candidate(msgspec.Struct):
     certifications: List[Certification]
     languages: List[Language]
     redrob_signals: RedrobSignals
+
+    @property
+    def skill_clusters(self) -> Dict[str, SkillCluster]:
+        return {
+            name: SkillCluster(name, skills)
+            for name, skills in gen_skill_cluster(self).items()
+        }
+
+    @property
+    def embed_data(self) -> CandidateEmbedData:
+        return {
+            "summary": (
+                f"I am a {self.profile.current_title}"
+                f" at {self.profile.current_company}"
+                f" in {self.profile.current_industry} industry."
+                f" {self.profile.summary}."
+            ),
+            "skills": [cluster.embed_str for cluster in self.skill_clusters.values()],
+            # "experience": [carrer.embed_str for carrer in self.career_history],
+        }

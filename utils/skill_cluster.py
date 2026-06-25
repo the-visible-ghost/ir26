@@ -1,7 +1,7 @@
 import re
 import numpy as np
 from typing import Dict, List
-from .candidate import Candidate
+from collections import defaultdict
 
 
 # =============================================================================
@@ -204,7 +204,7 @@ def cluster_skills(skill_names: list[str]) -> dict[str, list[str]]:
 # =============================================================================
 
 
-def extract_sentences(candidate: Candidate) -> List[str]:
+def extract_sentences(candidate) -> List[str]:
     """
     Extract clean sentences from candidate profile text.
     Sources: headline, summary, career descriptions.
@@ -318,11 +318,11 @@ def find_evidence(sentences: List[str], cluster: str, top_k: int = 3) -> List[st
 
 
 # =============================================================================
-# MAIN FUNCTION
+# MAIN FUNCTIONS
 # =============================================================================
 
 
-def cluster_skills_with_evidence(candidate: Candidate) -> Dict[str, Dict]:
+def cluster_skills_with_evidence(candidate) -> Dict[str, Dict]:
     """
     Cluster candidate skills into domains with description and evidence.
 
@@ -359,3 +359,13 @@ def cluster_skills_with_evidence(candidate: Candidate) -> Dict[str, Dict]:
         }
 
     return result
+
+
+def gen_skill_cluster(candidate):
+    clusters = defaultdict(list)
+    for skill in candidate.skills:
+        cluster = SKILL_TO_CLUSTER.get(skill.name)
+        if not cluster:
+            continue
+        clusters[cluster].append(skill)
+    return dict(clusters)
