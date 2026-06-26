@@ -1,6 +1,6 @@
 from os import path
 from sys import argv
-from time import perf_counter_ns
+from time import perf_counter
 
 
 def show_help(candidates_file, output_path):
@@ -26,12 +26,12 @@ def debug_print(*args, **kwargs):
 def debug(func):
     def wrapper(*args, **kwargs):
         debug_print(f"{func.__qualname__}({'...' if args or kwargs else ''}) called")
-        start = perf_counter_ns()
+        start = perf_counter()
         retval = func(*args, **kwargs)
-        elapsed = perf_counter_ns() - start
+        elapsed = perf_counter() - start
         debug_print(
             f"{func.__qualname__}({'...' if args or kwargs else ''}) "
-            f"{'returned' if retval else 'finished'} in {elapsed / 1_000_000} ms"
+            f"{'returned' if retval else 'finished'} in {elapsed:.3f} s"
         )
         return retval
 

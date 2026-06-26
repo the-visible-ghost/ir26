@@ -1,4 +1,3 @@
-import json
 from typing import List
 from utils import debug, parse_args, path
 from utils.candidate import Candidate
@@ -20,12 +19,11 @@ def main(candidates_file, output_path):
     data: List[Candidate] = load_candidates(candidates_file)
 
     width = __import__("shutil").get_terminal_size().columns // 2
-    bar_width = width - len(f"Checked [] {0:07,}/{len(data):,}  ")
-    print(f"{bar_width = }")
+    bar_width = width - len(f"Checked [] {len(data):,}/{len(data):,}  ")
 
     total = len(data)
 
-    a = []
+    a = 0
     for i, c in enumerate(data, 1):
         e = c.embed_data
         flag = False
@@ -44,7 +42,7 @@ def main(candidates_file, output_path):
                 break
 
         if flag:
-            a.append(c)
+            a += 1
 
         progress = int(bar_width * i / total)
         print(
@@ -53,7 +51,7 @@ def main(candidates_file, output_path):
         )
 
     print()
-    print(f"{len(a):,} people have their embedding data going beyond 512 tokens")
+    print(f"{a:,} people have their embedding data going beyond 512 tokens")
 
 
 if __name__ == "__main__":

@@ -386,7 +386,6 @@ def cluster_skills_with_evidence(candidate) -> Dict[str, Dict]:
     return result
 
 
-@debug
 def gen_skill_cluster(candidate):
     clusters = defaultdict(list)
     for skill in candidate.skills:
