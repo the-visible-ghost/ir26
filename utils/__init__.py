@@ -31,7 +31,7 @@ def debug(func):
         elapsed = perf_counter() - start
         debug_print(
             f"{func.__qualname__}({'...' if args or kwargs else ''}) "
-            f"{'returned' if retval else 'finished'} in {elapsed:.3f} s"
+            f"{'finished' if retval is None else 'returned'} in {elapsed:.3f} s"
         )
         return retval
 
