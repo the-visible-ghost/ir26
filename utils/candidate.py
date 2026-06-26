@@ -31,6 +31,8 @@ type CandidateEmbedData = Dict[
     Literal["summary", "skills", "experience"], str | List[str]
 ]
 
+vowels = ("a", "e", "i", "o", "u")
+
 
 class Profile(msgspec.Struct):
     anonymized_name: str
@@ -58,7 +60,13 @@ class Career(msgspec.Struct):
 
     @property
     def embed_str(self) -> str:
-        raise NotImplementedError
+        return (
+            f"{'Currently' if self.is_current else 'Previously'} "
+            f"{'an' if self.title[0] in vowels else 'a'} {self.title} "
+            f"at {self.company} ({self.company_size} employees) "
+            f"in {self.industry} industry for "
+            f"{self.duration_months // 12} years. \n" + self.description
+        )
 
 
 class Education(msgspec.Struct):

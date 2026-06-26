@@ -5,7 +5,7 @@ from time import perf_counter_ns
 
 def show_help(candidates_file, output_path):
     print(
-        "\nUSAGE: python " + path.basename(__file__) + " [OPTIONS]\n",
+        "\nUSAGE: python " + path.basename(argv[0]) + " [OPTIONS]\n",
         "OPTIONS:",
         "   --help                  Displays this message.\n",
         "   --candidates <FILE>     The JSON [optionally g-zipped] file that contains a list of candidates",
@@ -53,7 +53,7 @@ def parse_args(*, candidates_file, output_path):
             print()
             raise RuntimeError(
                 "No file specified after --out, "
-                f"see python {path.basename(__file__)} --help"
+                f"see python {path.basename(argv[0])} --help"
             )
         if not path.basename(sys.argv[_out_arg_index + 1]).endswith(".csv"):
             sys.tracebacklimit = 0
@@ -68,7 +68,7 @@ def parse_args(*, candidates_file, output_path):
             print()
             raise EOFError(
                 "No file specified after --candidates, "
-                f"see python {path.basename(__file__)} --help"
+                f"see python {path.basename(argv[0])} --help"
             )
         candi_name = path.basename(sys.argv[_candi_arg_index + 1])
         if not (candi_name.endswith(".jsonl") or candi_name.endswith(".jsonl.gz")):
@@ -82,7 +82,7 @@ def parse_args(*, candidates_file, output_path):
         print()
         raise FileNotFoundError(
             f'ERROR: Candidates file not found: "{candidates_file}"\n\n'
-            f"For more info run:  python {path.basename(__file__)} --help"
+            f"For more info run:  python {path.basename(argv[0])} --help"
         )
 
     sys.tracebacklimit = None
