@@ -6,7 +6,10 @@ from typing import Dict, List, Literal, Optional
 import datetime as dt
 import msgspec
 
-from utils.skill_cluster import gen_skill_cluster
+from utils.skill_cluster import (
+    CLUSTER_DESCRIPTIONS,
+    gen_skill_cluster,
+)
 
 type CompanySize = Literal[
     "1-10",
@@ -79,18 +82,19 @@ class Skill(msgspec.Struct):
         return (
             f"{self.proficiency} proficiency in "
             f"{self.name} with "
-            f"{self.duration_months} months of experience"
+            f"{self.duration_months // 12} years experience"
         )
 
 
 class SkillCluster(msgspec.Struct):
     name: str
+    desc: str
     skills: List[Skill]
 
     @property
     def embed_str(self) -> str:
         skills = "\n".join(" - " + skill.embed_str for skill in self.skills)
-        return f"{self.name}:\n{skills}"
+        return f"{self.name}:\n{self.desc}\n\n{skills}"
 
 
 class Certification(msgspec.Struct):
@@ -143,7 +147,7 @@ class Candidate(msgspec.Struct):
     @property
     def skill_clusters(self) -> Dict[str, SkillCluster]:
         return {
-            name: SkillCluster(name, skills)
+            name: SkillCluster(name, CLUSTER_DESCRIPTIONS[name], skills)
             for name, skills in gen_skill_cluster(self).items()
         }
 
@@ -154,8 +158,8 @@ class Candidate(msgspec.Struct):
                 f"I am a {self.profile.current_title}"
                 f" at {self.profile.current_company}"
                 f" in {self.profile.current_industry} industry."
-                f" {self.profile.summary}."
+                f" {self.profile.summary}"
             ),
             "skills": [cluster.embed_str for cluster in self.skill_clusters.values()],
-            # "experience": [carrer.embed_str for carrer in self.career_history],
+            "experience": [carrer.embed_str for carrer in self.career_history],
         }

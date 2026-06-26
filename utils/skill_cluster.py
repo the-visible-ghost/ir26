@@ -3,6 +3,8 @@ import numpy as np
 from typing import Dict, List
 from collections import defaultdict
 
+from . import debug
+
 
 # =============================================================================
 # CONFIGURATION
@@ -145,7 +147,7 @@ SKILL_CLUSTER_MAP = {
 }
 
 # Cluster descriptions (template-based, no LLM)
-CLUSTER_DESCRIPTIONS = {
+CLUSTER_DESCRIPTIONS_TEMPLATE = {
     "software_engineering": "Built software engineering systems and applications.",
     "data_engineering": "Built data engineering and data infrastructure systems.",
     "retrieval_ranking": "Built production retrieval, search and ranking systems.",
@@ -158,6 +160,21 @@ CLUSTER_DESCRIPTIONS = {
     "frontend": "Built frontend and product engineering interfaces.",
     "domain": "Applied domain expertise in business and operations.",
     "leadership": "Led teams and managed projects with process discipline.",
+}
+
+CLUSTER_DESCRIPTIONS = {
+    "software_engineering": "Experience building software systems and production applications.",
+    "data_engineering": "Experience building data pipelines and large-scale data infrastructure.",
+    "retrieval_ranking": "Experience with search, retrieval, recommendation and ranking systems.",
+    "machine_learning": "Experience applying machine learning models and statistical techniques.",
+    "deep_learning": "Experience with deep learning and computer vision systems.",
+    "nlp_llm": "Experience with NLP systems, language models and fine-tuning techniques.",
+    "mlops": "Experience deploying, serving and monitoring machine learning systems.",
+    "cloud": "Experience with cloud infrastructure and distributed systems deployment.",
+    "database": "Experience designing and working with database and storage systems.",
+    "frontend": "Experience building user interfaces and frontend applications.",
+    "domain": "Experience in domain-specific business and industry applications.",
+    "leadership": "Experience leading teams, projects and engineering processes.",
 }
 
 # Cluster prototypes for semantic matching
@@ -182,6 +199,7 @@ for cluster, skills in SKILL_CLUSTER_MAP.items():
         SKILL_TO_CLUSTER[skill] = cluster
 
 
+@debug
 def cluster_skills(skill_names: list[str]) -> dict[str, list[str]]:
     # Map a list of skill names to cluster buckets.
 
@@ -204,6 +222,7 @@ def cluster_skills(skill_names: list[str]) -> dict[str, list[str]]:
 # =============================================================================
 
 
+@debug
 def extract_sentences(candidate) -> List[str]:
     """
     Extract clean sentences from candidate profile text.
@@ -251,6 +270,7 @@ def extract_sentences(candidate) -> List[str]:
 # =============================================================================
 
 
+@debug
 def _embed(text: str, dim: int = 128) -> np.ndarray:
     """Deterministic word-hash embedding."""
     words = re.findall(r"\b[a-z]+\b", text.lower())
@@ -270,6 +290,7 @@ def _embed(text: str, dim: int = 128) -> np.ndarray:
     return emb
 
 
+@debug
 def _cosine(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.dot(a, b))
 
@@ -279,6 +300,7 @@ def _cosine(a: np.ndarray, b: np.ndarray) -> float:
 # =============================================================================
 
 
+@debug
 def find_evidence(sentences: List[str], cluster: str, top_k: int = 3) -> List[str]:
     """
     Find top-k evidence sentences for a cluster using semantic similarity.
@@ -322,6 +344,7 @@ def find_evidence(sentences: List[str], cluster: str, top_k: int = 3) -> List[st
 # =============================================================================
 
 
+@debug
 def cluster_skills_with_evidence(candidate) -> Dict[str, Dict]:
     """
     Cluster candidate skills into domains with description and evidence.
@@ -350,7 +373,9 @@ def cluster_skills_with_evidence(candidate) -> Dict[str, Dict]:
             continue
 
         evidence = find_evidence(sentences, cluster, top_k=3)
-        description = CLUSTER_DESCRIPTIONS.get(cluster, f"Experience in {cluster}.")
+        description = CLUSTER_DESCRIPTIONS_TEMPLATE.get(
+            cluster, f"Experience in {cluster}."
+        )
 
         result[cluster] = {
             "description": description,
@@ -361,6 +386,7 @@ def cluster_skills_with_evidence(candidate) -> Dict[str, Dict]:
     return result
 
 
+@debug
 def gen_skill_cluster(candidate):
     clusters = defaultdict(list)
     for skill in candidate.skills:
