@@ -1,16 +1,15 @@
-import utils
 import faiss
 import numpy as np
 
 from typing import Dict, List
-from utils import (
-    debug,
-    parse_args,
-    path,
-    load_json_file,
-)
 from utils.candidate import Candidate
 from utils.embedding import Embedder
+from utils import (
+    load_json_file,
+    parse_args,
+    debug,
+    path,
+)
 
 
 @debug
@@ -26,11 +25,10 @@ def load_candidates(file: str) -> List[Candidate]:
 
 @debug
 def load_job_desc(file: str) -> Dict[str, np.ndarray]:
-    with open(file, "r") as fp:
-        return {
-            section: np.array(vectors)
-            for section, vectors in __import__("json").load(fp).items()
-        }
+    return {
+        section: np.array(vectors)
+        for section, vectors in load_json_file(file).items()  # type: ignore
+    }
 
 
 @debug
