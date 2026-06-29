@@ -5,8 +5,9 @@ from . import debug
 
 
 class Embedder:
-    def __init__(self, model: str) -> None:
-        self._embedder: TextEmbedding = TextEmbedding(model)
+    @debug
+    def __init__(self, name: str, path: None | str = None) -> None:
+        self._embedder: TextEmbedding = TextEmbedding(name, model_dir=path)
 
     @debug
     def embed(self, texts: str | List[str]) -> np.ndarray:

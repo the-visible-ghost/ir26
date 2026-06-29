@@ -1,5 +1,14 @@
-from typing import List
-from utils import debug, parse_args, path
+import json
+import faiss
+import numpy as np
+
+from typing import Dict, List
+from utils import (
+    debug,
+    parse_args,
+    path,
+)
+import utils
 from utils.candidate import Candidate
 
 
@@ -15,9 +24,38 @@ def load_candidates(file: str) -> List[Candidate]:
 
 
 @debug
+def load_job_desc(file: str) -> Dict[str, np.ndarray]:
+    with open(file, "r") as fp:
+        return {
+            section: np.array(vectors)
+            for section, vectors in __import__("json").load(fp).items()
+        }
+
+
+@debug
+def load_json_file(file: str) -> Dict | List:
+    with open(file, "r") as fp:
+        return json.load(fp)
+
+
+@debug
 def main(candidates_file: str, output_path: str):
-    data = load_candidates(candidates_file)
-    print(data[0].candidate_id)
+    embedder = utils.embedding.Embedder(
+        name="BAAI/bge-base-en-v1.5",
+        path="./models/bge-bage-en-v1.5",
+    )
+
+    candidates: List[Candidate] = load_candidates(candidates_file)
+
+    job_desc = load_job_desc("./processed/job_desc.json")
+
+    summary_lookup = load_json_file("./processed/summary_lookup.json")
+    skills_lookup = load_json_file("./processed/skills_lookup.json")
+    experience_lookup = load_json_file("./processed/experience_lookup.json")
+
+    summary_index = faiss.read_index("./processed/summary_index.faiss")
+    skills_index = faiss.read_index("./processed/skills_index.faiss")
+    experience_index = faiss.read_index("./processed/experience_index.faiss")
 
 
 if __name__ == "__main__":

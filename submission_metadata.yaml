@@ -11,8 +11,8 @@ team_name: "Phantom Devs"  # Used in leaderboard and announcements
 
 primary_contact:
   name: "Harsh Verma"
-  email: "harshverma1902008@gmail.com"   # Used for all organizer communication
-  phone: "+91-9406500995"        # Used for top-50 / top-10 outreach
+  email: "harshverma1902008@gmail.com"    # Used for all organizer communication
+  phone: "+91-9406500995"                 # Used for top-50 / top-10 outreach
 
 team_members:
   - name: "Khushank Dhote"
@@ -20,10 +20,10 @@ team_members:
     role: "Team Lead"          # Optional, e.g. "Team Lead", "Backend", "Data"
   - name: "Harsh Verma"
     email: "harshverma1902008@gmail.com"
-  - name: "Kushagra Vishwakarma"
-    email: "kushagravishwakarma162007@gmail.com"
   - name: "Kashish Dhote"
     email: "kashishdhote2007@gmail.com"
+  - name: "Kushagra Vishwakarma"
+    email: "kushagravishwakarma162007@gmail.com"
   # Add more members as needed; solo participants list just one member
 
 # ============================================================================
@@ -46,15 +46,15 @@ reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submi
 # Compute environment
 # ============================================================================
 compute:
-  platform: "MacBook Pro M2"                    # Or: "AWS EC2 c5.4xlarge", "Local Linux box", etc.
-  cpu_cores: 8                                  # Number of CPU cores used
+  platform: "Personal Linux Laptop"             # Or: "AWS EC2 c5.4xlarge", "Local Linux box", etc.
+  cpu_cores: 4                                  # Number of CPU cores used
   ram_gb: 12                                    # Available RAM in GB
-  python_version: "3.11.4"                      # python --version
-  os: "macOS 14.2"                              # Or "Ubuntu 22.04 LTS", etc.
+  python_version: "3.14.6"                      # python --version
+  os: "Arch Linux 7.0.13-arch1-1"               # Or "Ubuntu 22.04 LTS", etc.
   uses_gpu_for_inference: false                 # Must be false — see compute constraints
   has_network_during_ranking: false             # Must be false — no API calls during ranking
-  pre_computation_required: true               # true if you pre-compute embeddings or train models offline
-  pre_computation_time_minutes: 0               # Approximate, if applicable
+  pre_computation_required: true                # true if you pre-compute embeddings or train models offline
+  pre_computation_time_minutes: 21              # Approximate, if applicable
 
 # ============================================================================
 # AI tools declaration
