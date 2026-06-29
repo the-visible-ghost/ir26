@@ -1,7 +1,12 @@
+import json
 from os import path
 from sys import argv
 from time import perf_counter
-from typing import Dict, Literal
+from typing import (
+    Dict,
+    Literal,
+    List,
+)
 
 
 def show_help(candidates_file, output_path):
@@ -37,6 +42,18 @@ def debug(func):
         return retval
 
     return wrapper
+
+
+@debug
+def load_json_file(file: str) -> Dict | List:
+    with open(file, "r") as fp:
+        return json.load(fp)
+
+
+@debug
+def dump_json_file(data: Dict | List, file: str) -> None:
+    with open(file, "w") as fp:
+        json.dump(data, fp)
 
 
 @debug

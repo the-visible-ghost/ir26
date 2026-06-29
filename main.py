@@ -1,4 +1,4 @@
-import json
+import utils
 import faiss
 import numpy as np
 
@@ -7,9 +7,10 @@ from utils import (
     debug,
     parse_args,
     path,
+    load_json_file,
 )
-import utils
 from utils.candidate import Candidate
+from utils.embedding import Embedder
 
 
 @debug
@@ -33,14 +34,8 @@ def load_job_desc(file: str) -> Dict[str, np.ndarray]:
 
 
 @debug
-def load_json_file(file: str) -> Dict | List:
-    with open(file, "r") as fp:
-        return json.load(fp)
-
-
-@debug
 def main(candidates_file: str, output_path: str):
-    embedder = utils.embedding.Embedder(
+    embedder = Embedder(
         name="BAAI/bge-base-en-v1.5",
         path="./models/bge-bage-en-v1.5",
     )
