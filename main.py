@@ -4,7 +4,7 @@ from utils.candidate import Candidate
 
 
 @debug
-def load_candidates(file) -> List[Candidate]:
+def load_candidates(file: str) -> List[Candidate]:
     decode = __import__("msgspec").json.decode
     with (
         __import__("gzip").open(file, "rb")
@@ -15,8 +15,9 @@ def load_candidates(file) -> List[Candidate]:
 
 
 @debug
-def main(candidates_file, output_path):
+def main(candidates_file: str, output_path: str):
     data = load_candidates(candidates_file)
+    print(data[0].candidate_id)
 
 
 if __name__ == "__main__":

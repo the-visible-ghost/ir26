@@ -3,3 +3,4 @@ __pycache__
 .ipynb_checkpoints
 large_files/**
 !large_files/*.gz
+temp/**

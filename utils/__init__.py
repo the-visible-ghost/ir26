@@ -1,6 +1,7 @@
 from os import path
 from sys import argv
 from time import perf_counter
+from typing import Dict, Literal
 
 
 def show_help(candidates_file, output_path):
@@ -39,7 +40,9 @@ def debug(func):
 
 
 @debug
-def parse_args(*, candidates_file, output_path):
+def parse_args(
+    *, candidates_file: str, output_path: str
+) -> Dict[Literal["candidates_file", "output_path"], str]:
     import sys
 
     if "--help" in sys.argv:

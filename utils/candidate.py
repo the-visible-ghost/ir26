@@ -61,11 +61,12 @@ class Career(msgspec.Struct):
     @property
     def embed_str(self) -> str:
         return (
-            f"{'Currently' if self.is_current else 'Previously'} "
+            f"I {'am' if self.is_current else 'was'} "
+            f"{'currently' if self.is_current else 'previously'} "
             f"{'an' if self.title[0] in vowels else 'a'} {self.title} "
             f"at {self.company} ({self.company_size} employees) "
             f"in {self.industry} industry for "
-            f"{self.duration_months // 12} years. \n" + self.description
+            f"{self.duration_months // 12} years.\n" + self.description
         )
 
 
