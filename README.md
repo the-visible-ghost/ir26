@@ -1,4 +1,4 @@
-# Phantom Devs - India Runs 2026
+# PhantomDevs - India Runs 2026
 ## Important CRITICAL Note:
 > ### This repository uses Git Large File Storage (Git LFS).
 
