@@ -412,122 +412,79 @@ class Candidate(msgspec.Struct):
 
     def _build_reason(self, features: ReasonFeatures) -> str:
         """
-        Build a robust, context-aware reason string.
-
-        This is the core reason generator that handles all edge cases:
-        - Career pivots (pandemic, industry shift, personal reasons)
-        - Fresh graduates with potential
-        - Career gaps with skill maintenance
-        - Overqualified candidates
-        - Self-taught practitioners
-        - Passive candidates
-        - Honeypot-like but genuine profiles
+        Generate a human-readable sentence explaining why this candidate was ranked.
+        Answers: "Why is this person here?" and "What do they bring?"
         """
-
         p = self.profile
         r = self.redrob_signals
         career = self.career_history
 
-        # Determine match quality label
-        if features.match_score >= 0.7:
-            match_label = "strong"
-        elif features.match_score >= 0.4:
-            match_label = "good"
-        else:
-            match_label = "moderate"
+        # Determine what makes this candidate stand out
+        standout = []
 
-        # Get trajectory info
+        # 1. Relevant experience depth
+        if features.match_score >= 0.75:
+            standout.append("deep role alignment")
+        elif features.match_score >= 0.5:
+            standout.append("relevant background")
+
+        # 2. Proven skills from actual work
+        past_skills = [s.name for s in self.skills if s.duration_months >= 24]
+        if len(past_skills) >= 2:
+            standout.append(f"proven {past_skills[0]} and {past_skills[1]} expertise")
+        elif len(past_skills) == 1:
+            standout.append(f"proven {past_skills[0]} expertise")
+
+        # 3. Current applicability
+        if features.has_relevant_current_role:
+            standout.append("actively working in a similar role")
+        elif features.has_relevant_past_role and career:
+            relevant_past = [c for c in career[1:] if not c.is_current]
+            if relevant_past:
+                standout.append(f"prior {relevant_past[0].title} experience")
+
+        # 4. Engagement signals
+        if r.open_to_work_flag and r.recruiter_response_rate > 0.5:
+            standout.append("responsive and actively looking")
+        elif r.open_to_work_flag:
+            standout.append("open to opportunities")
+
+        # Build the sentence
+        parts = []
+
+        # Identity clause
+        identity = f"{p.years_of_experience:.0f}-year {p.current_title}"
+        if career and len(career) > 1:
+            past = career[1].title
+            identity += f" (previously {past})"
+
+        parts.append(identity)
+
+        # Standout clause
+        if standout:
+            parts.append(f"brings {', '.join(standout)}")
+
+        # Caveat clause (only if notable)
+        caveat = ""
         trajectory, traj_details = self._analyze_career_trajectory()
-        skill_source, skill_evidence = self._analyze_skill_sources()
         mismatch = self._classify_mismatch(
             features.internal_penalty, features.penalty_breakdown
         )
 
-        # Build skill phrase
-        top_skills = features.top_skills[:3]
-        skill_phrase = ", ".join(top_skills) if top_skills else "relevant skills"
-
-        # Build current status phrase
-        current_title = p.current_title
-        current_company = p.current_company
-        yoe = p.years_of_experience
-
-        # --- TEMPLATE SELECTION ---
-
-        parts = []
-
-        # Part 1: Identity / Current State
-        if trajectory == "fresh":
-            parts.append(
-                f"{yoe:.1f}YOE {current_title} with strong {skill_phrase} foundation"
-            )
-        elif trajectory in ("pivot", "pivot_with_gap"):
-            past_title = (
-                traj_details["past_titles"][0]
-                if traj_details.get("past_titles")
-                else "professional"
-            )
-            parts.append(
-                f"Former {past_title} ({yoe:.1f}YOE), currently {current_title}"
-            )
-        elif trajectory == "gap":
-            parts.append(f"{yoe:.1f}YOE {current_title} with career gap")
-        else:
-            parts.append(f"{yoe:.1f}YOE {current_title} at {current_company}")
-
-        # Part 2: Skill Evidence
-        if skill_source == "self_taught" and len(skill_evidence) >= 3:
-            parts.append(f"self-taught {skill_phrase} via projects")
-        elif skill_source == "past_job":
-            parts.append(f"proven {skill_phrase} from past roles")
-        elif skill_source == "current_job":
-            parts.append(f"actively using {skill_phrase}")
-        else:
-            parts.append(f"skilled in {skill_phrase}")
-
-        # Part 3: Match Quality
-        if match_label == "strong":
-            parts.append("strong role alignment")
-        elif match_label == "good":
-            parts.append("good fit")
-        else:
-            parts.append("potential match")
-
-        # Part 4: Caveats / Context
-        caveat = ""
-
-        if mismatch == "career_pivot":
-            if traj_details.get("gap_months", 0) > 12:
-                caveat = f"career gap ({traj_details['gap_months'] // 12}Y); skills maintained"
-            else:
-                caveat = "career transition; ready to re-engage"
-
+        if mismatch == "career_pivot" and traj_details.get("gap_months", 0) > 12:
+            caveat = f"career gap of {traj_details['gap_months'] // 12} years"
         elif mismatch == "honeypot_like":
-            # Don't accuse, but flag for review
-            caveat = "profile shows skill-career divergence; verify in interview"
+            caveat = "claims need verification"
+        elif not (r.verified_email and r.verified_phone):
+            caveat = "contact details unverified"
+        elif not r.open_to_work_flag:
+            caveat = "passive candidate"
 
-        elif mismatch == "skill_expert":
-            caveat = "deep expertise; may be overqualified"
-
-        elif not r.verified_email or not r.verified_phone:
-            caveat = "unverified contact; confirm availability"
-
-        elif not r.open_to_work_flag and r.profile_views_received_30d < 5:
-            caveat = "passive candidate; outreach recommended"
-
-        elif r.offer_acceptance_rate >= 0 and r.offer_acceptance_rate < 0.3:
-            caveat = "low offer acceptance; competitive market"
-
-        # Combine parts
-        reason = "; ".join(parts)
         if caveat:
-            reason += f". {capex(caveat)}"
+            parts.append(f"note: {caveat}")
 
-        # Truncate if too long
-        if len(reason) > 250:
-            reason = reason[:247] + "..."
-
-        return reason
+        reason = ", ".join(parts) + "."
+        return reason[:247] + "..." if len(reason) > 250 else reason
 
     @property
     def reason(self) -> str:
