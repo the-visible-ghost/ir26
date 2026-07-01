@@ -1,4 +1,5 @@
 import json
+import numpy as np
 from os import path
 from sys import argv
 from time import perf_counter
@@ -111,6 +112,25 @@ def parse_args(
         "candidates_file": candidates_file,
         "output_path": output_path,
     }
+
+
+def cosine_from_l2(distance):
+    return 1 - (distance / 2)
+
+
+def cosine_similarity(a, b):
+    norm_a = np.linalg.norm(a)
+    norm_b = np.linalg.norm(b)
+    return np.dot(a, b) / (norm_a * norm_b) if not (norm_a == 0 or norm_b == 0) else 0.0
+
+
+def normalize(v):
+    norm = np.linalg.norm(v)
+    return v / norm if norm > 0 else v
+
+
+def centroid(vectors):
+    return normalize(np.mean(vectors, axis=0))
 
 
 from . import candidate, embedding, job_desc

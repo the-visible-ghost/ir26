@@ -172,3 +172,26 @@ class Candidate(msgspec.Struct):
             "skills": [cluster.embed_str for cluster in self.skill_clusters.values()],
             "experience": [carrer.embed_str for carrer in self.career_history],
         }
+
+    @property
+    def text(self) -> str:
+        embed_data = self.embed_data
+        return (
+            f"Sumamary: {embed_data['summary']}. "
+            f"Skills: {', '.join(skill.embed_str for skill in self.skills)}. "
+            f"Experience: {', '.join(embed_data['experience'])}."
+        )
+
+    @property
+    def reason(self) -> str:
+        ai_skills = sum(
+            len(cluster.skills)
+            for name, cluster in self.skill_clusters.items()
+            if name in ("retrieval_ranking", "machine_learning", "nlp_llm")
+        )
+        return (
+            f"Currently {self.profile.current_title} "
+            f"with {self.career_history[0].duration_months:.1f} yrs; "
+            f"{ai_skills} AI core skills; "
+            f"response rate {self.redrob_signals.recruiter_response_rate}."
+        )

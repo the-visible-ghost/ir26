@@ -1,0 +1,46 @@
+{
+    "processed/experience_index.faiss": [
+        "./chunks/processed/experience_index.faiss.0",
+        "./chunks/processed/experience_index.faiss.1",
+        "./chunks/processed/experience_index.faiss.2",
+        "./chunks/processed/experience_index.faiss.3",
+        "./chunks/processed/experience_index.faiss.4",
+        "./chunks/processed/experience_index.faiss.5"
+    ],
+    "processed/skills_index.faiss": [
+        "./chunks/processed/skills_index.faiss.0",
+        "./chunks/processed/skills_index.faiss.1",
+        "./chunks/processed/skills_index.faiss.2",
+        "./chunks/processed/skills_index.faiss.3",
+        "./chunks/processed/skills_index.faiss.4",
+        "./chunks/processed/skills_index.faiss.5",
+        "./chunks/processed/skills_index.faiss.6",
+        "./chunks/processed/skills_index.faiss.7",
+        "./chunks/processed/skills_index.faiss.8",
+        "./chunks/processed/skills_index.faiss.9",
+        "./chunks/processed/skills_index.faiss.10"
+    ],
+    "processed/summary_index.faiss": [
+        "./chunks/processed/summary_index.faiss.0",
+        "./chunks/processed/summary_index.faiss.1"
+    ],
+    "processed/summary_vectors.npy": [
+        "./chunks/processed/summary_vectors.npy.0"
+    ],
+    "processed/skills_vectors.npy": [
+        "./chunks/processed/skills_vectors.npy.0",
+        "./chunks/processed/skills_vectors.npy.1",
+        "./chunks/processed/skills_vectors.npy.2",
+        "./chunks/processed/skills_vectors.npy.3",
+        "./chunks/processed/skills_vectors.npy.4"
+    ],
+    "processed/experience_vectors.npy": [
+        "./chunks/processed/experience_vectors.npy.0",
+        "./chunks/processed/experience_vectors.npy.1",
+        "./chunks/processed/experience_vectors.npy.2"
+    ],
+    "models/ms-marco-MiniLM-L-12-v2/model.safetensors": [
+        "./chunks/models/ms-marco-MiniLM-L-12-v2/model.safetensors.0",
+        "./chunks/models/ms-marco-MiniLM-L-12-v2/model.safetensors.1"
+    ]
+}
