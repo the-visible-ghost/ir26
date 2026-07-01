@@ -1,9 +1,10 @@
 """
-Wrapper for Candidate JSON-Object
+Wrapper for Candidate JSON-Object with Robust Reason Generation
 """
 
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Tuple
 import datetime as dt
+import numpy as np
 import msgspec
 
 from utils.skill_cluster import (
@@ -32,6 +33,61 @@ type CandidateEmbedData = Dict[
 ]
 
 vowels = ("a", "e", "i", "o", "u")
+
+
+# =============================================================================
+# Reason Feature Accumulator
+# =============================================================================
+# This class collects features during scoring to build a rich, contextual reason
+
+
+class ReasonFeatures:
+    """Accumulates features during scoring for robust reason generation."""
+
+    def __init__(self):
+        # Match quality
+        self.match_score: float = 0.0
+        self.match_category: str = "low"  # low, medium, high
+        self.top_matching_sections: List[str] = []
+
+        # Career analysis
+        self.career_trajectory: str = "unknown"  # stable, gap, pivot, transition, fresh
+        self.yoe: float = 0.0
+        self.current_title: str = ""
+        self.current_company: str = ""
+        self.current_industry: str = ""
+        self.past_titles: List[str] = []
+        self.past_industries: List[str] = []
+        self.has_relevant_current_role: bool = False
+        self.has_relevant_past_role: bool = False
+
+        # Skills analysis
+        self.relevant_skill_count: int = 0
+        self.advanced_skill_count: int = 0
+        self.skill_source: str = "unknown"  # current_job, past_job, self_taught, mixed
+        self.top_skills: List[str] = []
+        self.skill_assessment_avg: Optional[float] = None
+
+        # Signals
+        self.profile_completeness: float = 0.0
+        self.is_verified: bool = False
+        self.is_active: bool = False
+        self.open_to_work: bool = False
+        self.response_rate: float = 0.0
+        self.github_active: bool = False
+
+        # Mismatch / penalty analysis
+        self.internal_penalty: float = 0.0
+        self.mismatch_type: str = (
+            "none"  # none, minor, career_pivot, skill_inflation, honeypot_like
+        )
+        self.penalty_breakdown: Dict[str, float] = {}
+
+        # Temporal
+        self.career_gap_months: int = 0
+        self.is_recent_graduate: bool = False
+        self.is_career_changer: bool = False
+        self.years_since_last_relevant: float = 0.0
 
 
 class Profile(msgspec.Struct):
@@ -153,6 +209,10 @@ class Candidate(msgspec.Struct):
     languages: List[Language]
     redrob_signals: RedrobSignals
 
+    # Mutable field for storing reason features accumulated during scoring.
+    # msgspec.Struct defaults to frozen=False, so this is mutable.
+    _reason_features: Optional[ReasonFeatures] = None
+
     @property
     def skill_clusters(self) -> Dict[str, SkillCluster]:
         return {
@@ -182,16 +242,351 @@ class Candidate(msgspec.Struct):
             f"Experience: {', '.join(embed_data['experience'])}."
         )
 
+    # =============================================================================
+    # ROBUST REASON GENERATOR
+    # =============================================================================
+
+    def _analyze_career_trajectory(self) -> Tuple[str, Dict]:
+        """
+        Analyze career trajectory to detect gaps, pivots, transitions.
+        Returns: (trajectory_type, trajectory_details)
+        """
+        career = self.career_history
+        if not career:
+            return "unknown", {}
+
+        details = {
+            "current_title": career[0].title if career else "",
+            "past_titles": [c.title for c in career[1:]],
+            "current_industry": career[0].industry if career else "",
+            "past_industries": list(set(c.industry for c in career[1:])),
+            "total_months": sum(c.duration_months for c in career),
+            "gap_months": 0,
+            "is_fresh": self.profile.years_of_experience < 2 and len(career) <= 2,
+        }
+
+        # Detect career gaps between consecutive jobs
+        if len(career) >= 2:
+            for i in range(len(career) - 1):
+                current_end = career[i].end_date
+                next_start = career[i + 1].start_date
+                if current_end and next_start:
+                    gap = (next_start - current_end).days / 30
+                    if gap > 3:  # > 3 months gap
+                        details["gap_months"] += int(gap)
+
+        # Detect pivot: current role very different from past roles
+        if len(career) >= 2:
+            current_title_lower = career[0].title.lower()
+            past_titles_lower = [c.title.lower() for c in career[1:]]
+
+            # Simple keyword overlap for pivot detection
+            current_keywords = set(current_title_lower.split())
+            pivot_score = 0
+            for past in past_titles_lower:
+                past_keywords = set(past.split())
+                overlap = len(current_keywords & past_keywords)
+                union = len(current_keywords | past_keywords)
+                if union > 0:
+                    pivot_score += overlap / union
+
+            avg_similarity = (
+                pivot_score / len(past_titles_lower) if past_titles_lower else 1.0
+            )
+
+            if avg_similarity < 0.3 and details["gap_months"] > 6:
+                return "pivot_with_gap", details
+            elif avg_similarity < 0.3:
+                return "pivot", details
+            elif details["gap_months"] > 6:
+                return "gap", details
+
+        if details["is_fresh"]:
+            return "fresh", details
+
+        return "stable", details
+
+    def _analyze_skill_sources(self) -> Tuple[str, List[str]]:
+        """
+        Determine where skills come from: current job, past jobs, or self-taught.
+        Returns: (source_type, evidence_list)
+        """
+        career = self.career_history
+        skills = self.skills
+
+        if not skills or not career:
+            return "unknown", []
+
+        # Build text from all career entries
+        all_exp_text = " ".join(f"{c.title} {c.description}".lower() for c in career)
+        current_exp_text = (
+            f"{career[0].title} {career[0].description}".lower() if career else ""
+        )
+        past_exp_text = " ".join(
+            f"{c.title} {c.description}".lower() for c in career[1:]
+        )
+
+        current_matches = []
+        past_matches = []
+        unmatched = []
+
+        for skill in skills:
+            skill_name = skill.name.lower()
+            skill_words = set(skill_name.split()) | {skill_name}
+
+            # Check if skill appears in current role
+            in_current = any(word in current_exp_text for word in skill_words)
+            in_past = any(word in past_exp_text for word in skill_words)
+            in_any = any(word in all_exp_text for word in skill_words)
+
+            if in_current:
+                current_matches.append(skill.name)
+            elif in_past:
+                past_matches.append(skill.name)
+            elif in_any:
+                past_matches.append(skill.name)
+            else:
+                unmatched.append(skill.name)
+
+        # Determine primary source
+        total = len(skills)
+        current_ratio = len(current_matches) / total if total > 0 else 0
+        past_ratio = len(past_matches) / total if total > 0 else 0
+        unmatched_ratio = len(unmatched) / total if total > 0 else 0
+
+        if current_ratio >= 0.6:
+            return "current_job", current_matches
+        elif past_ratio >= 0.5 and current_ratio < 0.3:
+            return "past_job", past_matches
+        elif unmatched_ratio >= 0.5:
+            return "self_taught", unmatched
+        else:
+            return "mixed", current_matches + past_matches
+
+    def _classify_mismatch(
+        self, penalty: float, penalty_breakdown: Dict[str, float]
+    ) -> str:
+        """
+        Classify the type of mismatch to determine if it's a honeypot or genuine transition.
+        """
+        if penalty < 0.2:
+            return "none"
+
+        # Check which penalties are high
+        high_penalties = {k: v for k, v in penalty_breakdown.items() if v > 0.5}
+
+        if not high_penalties:
+            return "minor"
+
+        # Career pivot: high title-exp mismatch but career is coherent
+        if (
+            "title_exp_penalty" in high_penalties
+            and "career_penalty" not in high_penalties
+        ):
+            trajectory, _ = self._analyze_career_trajectory()
+            if trajectory in ("pivot", "pivot_with_gap"):
+                return "career_pivot"
+
+        # Skill inflation: many advanced skills but low assessment
+        if "skill_inflation_penalty" in high_penalties:
+            assessments = self.redrob_signals.skill_assessment_scores
+            if assessments:
+                avg = np.mean(list(assessments.values()))
+                if avg < 50:
+                    return "honeypot_like"
+            # Could be genuine expert with no assessments
+            return "skill_expert"
+
+        # Summary doesn't match experience: possible fake profile
+        if (
+            "summary_exp_penalty" in high_penalties
+            and "skill_exp_penalty" in high_penalties
+        ):
+            return "honeypot_like"
+
+        # Education issues
+        if "education_penalty" in high_penalties:
+            return "data_quality_issue"
+
+        return "minor"
+
+    def _build_reason(self, features: ReasonFeatures) -> str:
+        """
+        Build a robust, context-aware reason string.
+
+        This is the core reason generator that handles all edge cases:
+        - Career pivots (pandemic, industry shift, personal reasons)
+        - Fresh graduates with potential
+        - Career gaps with skill maintenance
+        - Overqualified candidates
+        - Self-taught practitioners
+        - Passive candidates
+        - Honeypot-like but genuine profiles
+        """
+
+        p = self.profile
+        r = self.redrob_signals
+        career = self.career_history
+
+        # Determine match quality label
+        if features.match_score >= 0.7:
+            match_label = "strong"
+        elif features.match_score >= 0.4:
+            match_label = "good"
+        else:
+            match_label = "moderate"
+
+        # Get trajectory info
+        trajectory, traj_details = self._analyze_career_trajectory()
+        skill_source, skill_evidence = self._analyze_skill_sources()
+        mismatch = self._classify_mismatch(
+            features.internal_penalty, features.penalty_breakdown
+        )
+
+        # Build skill phrase
+        top_skills = features.top_skills[:3]
+        skill_phrase = ", ".join(top_skills) if top_skills else "relevant skills"
+
+        # Build current status phrase
+        current_title = p.current_title
+        current_company = p.current_company
+        yoe = p.years_of_experience
+
+        # --- TEMPLATE SELECTION ---
+
+        parts = []
+
+        # Part 1: Identity / Current State
+        if trajectory == "fresh":
+            parts.append(
+                f"{yoe:.1f}YOE {current_title} with strong {skill_phrase} foundation"
+            )
+        elif trajectory in ("pivot", "pivot_with_gap"):
+            past_title = (
+                traj_details["past_titles"][0]
+                if traj_details.get("past_titles")
+                else "professional"
+            )
+            parts.append(
+                f"Former {past_title} ({yoe:.1f}YOE), currently {current_title}"
+            )
+        elif trajectory == "gap":
+            parts.append(f"{yoe:.1f}YOE {current_title} with career gap")
+        else:
+            parts.append(f"{yoe:.1f}YOE {current_title} at {current_company}")
+
+        # Part 2: Skill Evidence
+        if skill_source == "self_taught" and len(skill_evidence) >= 3:
+            parts.append(f"self-taught {skill_phrase} via projects")
+        elif skill_source == "past_job":
+            parts.append(f"proven {skill_phrase} from past roles")
+        elif skill_source == "current_job":
+            parts.append(f"actively using {skill_phrase}")
+        else:
+            parts.append(f"skilled in {skill_phrase}")
+
+        # Part 3: Match Quality
+        if match_label == "strong":
+            parts.append("strong role alignment")
+        elif match_label == "good":
+            parts.append("good fit")
+        else:
+            parts.append("potential match")
+
+        # Part 4: Caveats / Context
+        caveat = ""
+
+        if mismatch == "career_pivot":
+            if traj_details.get("gap_months", 0) > 12:
+                caveat = f"career gap ({traj_details['gap_months'] // 12}Y); skills maintained"
+            else:
+                caveat = "career transition; ready to re-engage"
+
+        elif mismatch == "honeypot_like":
+            # Don't accuse, but flag for review
+            caveat = "profile shows skill-career divergence; verify in interview"
+
+        elif mismatch == "skill_expert":
+            caveat = "deep expertise; may be overqualified"
+
+        elif not r.verified_email or not r.verified_phone:
+            caveat = "unverified contact; confirm availability"
+
+        elif not r.open_to_work_flag and r.profile_views_received_30d < 5:
+            caveat = "passive candidate; outreach recommended"
+
+        elif r.offer_acceptance_rate >= 0 and r.offer_acceptance_rate < 0.3:
+            caveat = "low offer acceptance; competitive market"
+
+        # Combine parts
+        reason = "; ".join(parts)
+        if caveat:
+            reason += f". {capex(caveat)}"
+
+        # Truncate if too long
+        if len(reason) > 250:
+            reason = reason[:247] + "..."
+
+        return reason
+
     @property
     def reason(self) -> str:
+        """
+        Generate a robust, context-aware reason for why this candidate was ranked.
+
+        If reason features were accumulated during scoring, use them for a rich reason.
+        Otherwise, fall back to a basic analysis.
+        """
+        if self._reason_features is not None:
+            return self._build_reason(self._reason_features)
+
+        # Fallback: basic reason without scoring context
+        p = self.profile
+        r = self.redrob_signals
+
+        # Count AI-relevant skills
+        ai_clusters = (
+            "retrieval_ranking",
+            "machine_learning",
+            "nlp_llm",
+            "deep_learning",
+        )
         ai_skills = sum(
             len(cluster.skills)
             for name, cluster in self.skill_clusters.items()
-            if name in ("retrieval_ranking", "machine_learning", "nlp_llm")
+            if name in ai_clusters
         )
-        return (
-            f"Currently {self.profile.current_title} "
-            f"with {self.career_history[0].duration_months:.1f} yrs; "
-            f"{ai_skills} AI core skills; "
-            f"response rate {self.redrob_signals.recruiter_response_rate}."
-        )
+
+        # Basic trajectory check
+        trajectory, _ = self._analyze_career_trajectory()
+
+        if trajectory == "fresh":
+            return (
+                f"{p.years_of_experience:.1f}YOE {p.current_title} "
+                f"with {ai_skills} AI core skills; "
+                f"response rate {r.recruiter_response_rate:.0%}."
+            )
+        elif trajectory in ("pivot", "pivot_with_gap"):
+            past = (
+                self.career_history[1].title
+                if len(self.career_history) > 1
+                else "professional"
+            )
+            return (
+                f"Former {past} ({p.years_of_experience:.1f}YOE), "
+                f"currently {p.current_title}; "
+                f"{ai_skills} AI skills; "
+                f"response rate {r.recruiter_response_rate:.0%}."
+            )
+        else:
+            return (
+                f"Currently {p.current_title} "
+                f"with {p.years_of_experience:.1f}YOE; "
+                f"{ai_skills} AI core skills; "
+                f"response rate {r.recruiter_response_rate:.0%}."
+            )
+
+
+def capex(s: str) -> str:
+    """Capitalize first letter of string."""
+    return s[0].upper() + s[1:] if s else s
