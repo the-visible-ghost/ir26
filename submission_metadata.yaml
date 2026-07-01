@@ -1,4 +1,4 @@
-# Redrob Hackathon — Submission Metadata Template
+# Redrob Hackathon — Submission Metadata
 #
 # Copy this file to your repo root as `submission_metadata.yaml` and fill it in.
 # The fields here should match what you submit via the portal at upload time.
@@ -29,11 +29,11 @@ team_members:
 # ============================================================================
 # Code and reproducibility
 # ============================================================================
-github_repo: "https://github.com/the-visible-ghost/india-runs-2026"
+github_repo: "https://github.com/the-visible-ghost/ir26"
 # Required. Must be reachable. Private repos OK if you can grant organizer
 # access at Stage 3 (the email to add will be communicated then).
 
-sandbox_link: "https://colab.research.google.com/github/the-visible-ghost/india-runs-2026/blob/main/Notebooks/sandbox.ipynb"
+sandbox_link: "https://colab.research.google.com/github/the-visible-ghost/ir26/blob/main/Notebooks/sandbox.ipynb"
 # Required. A working hosted environment where the ranker can be run on a small
 # candidate sample. See Section 10.5 of submission_spec.md for acceptable
 # platforms (HuggingFace Spaces, Streamlit Cloud, Replit, Colab, Docker, Binder).
@@ -67,25 +67,30 @@ ai_tools_used:
   # Other options: "ChatGPT", "Cursor", "Gemini", "Codeium", "Other", "None"
 
 ai_usage_summary: |
-  Briefly describe how AI tools were used. Examples:
-  - "Used ChatGPT for architectural discussion. No autocomplete used.
-     No candidate data was fed to any LLM."
-  - "Used ChatGPT to debug Python issues."
-  - "No AI tools except these were used."
+  - "Only AI used was ChatGPT (Free tier)"
+  - "To extract JD processed components (./utils/job_desc.py)"
+  - "For architectural and ranking pipeline discussions"
+  - "For debugging python functions and as docs"
+  - "To discuss about different sentence transformers, cross encoders,
+      pros and cons for different models and approches and stuff"
+  - "To write general concrete functions.
+      ChatGPT was not used to write architecture specific code"
 
 # ============================================================================
 # Approach summary (optional but recommended)
 # ============================================================================
 methodology_summary: |
-  ≤200 word summary of your approach. Strongly recommended.
-
-  Example:
-  "Rule-based ranker with explicit reasoning capture. Five scoring components
-  (skills, title+career, experience years, location, education) combined with
-  a multiplicative behavioral-signal modifier. The title component is the
-  decisive signal against keyword-stuffer traps; an endorsement-and-duration
-  trust multiplier on skills catches lazy keyword stuffing. Runtime is ~10
-  seconds for 50K candidates on CPU."
+  This approach extracts JD's intent into different components and atomic embeddings.
+  Features extracted/generated from candidates are their overall summary, skills (clustered)
+  and career history are embedded separately to avoid dilution and perform deeper semantic ranking.
+  L2 normalized candidate embedding vectors are added to separate FAISS HNSW Flat indices.
+  Initial retrieval is performed from the indices with a subset of pre-processed JD's components.
+  Then those are scored based on cosine similarities, redrob signals, and how well the intent is
+  integrated with the JD, then the initial scores are aggregated based on respective weights.
+  Based on dis-similarities or inconsistencies internally between candidates overall summary, skills,
+  or experience (carrer history) the candidate score is penalized depending on the inconsistency.
+  Then cross encoder reranking is performed with processed JD text and processed candidate texts.
+  The final score is the weighted aggregation of all the scores and penalties.
 
 # ============================================================================
 # Declarations
