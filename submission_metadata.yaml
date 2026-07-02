@@ -86,11 +86,13 @@ methodology_summary: |
   L2 normalized candidate embedding vectors are added to separate FAISS HNSW Flat indices.
   Initial retrieval is performed from the indices with a subset of pre-processed JD's components.
   Then those are scored based on cosine similarities, redrob signals, and how well the intent is
-  integrated with the JD, then the initial scores are aggregated based on respective weights.
-  Based on dis-similarities or inconsistencies internally between candidates overall summary, skills,
-  or experience (carrer history) the candidate score is penalized depending on the inconsistency.
-  Then cross encoder reranking is performed with processed JD text and processed candidate texts.
-  The final score is the weighted aggregation of all the scores and penalties.
+  integrated with the JD, then the initial scores are aggregated based on respective weights and
+  reasoning features is accumulated alongsize. Based on dis-similarities or inconsistencies
+  internally between candidates overall summary, skills, or experience (carrer history)
+  the candidate score is penalized depending on the inconsistency. Then cross encoder reranking
+  is performed with processed JD text and processed candidate texts.
+  The final score is the weighted aggregation of all the scores and penalties and accumulated
+  reasoning features are materialized into the final reasoning.
 
 # ============================================================================
 # Declarations
