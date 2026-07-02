@@ -4,3 +4,4 @@ __pycache__
 large_files/**
 !large_files/*.gz
 temp/**
+submission.csv
