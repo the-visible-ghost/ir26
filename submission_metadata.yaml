@@ -92,6 +92,7 @@ methodology_summary: |
   internally between candidates overall summary, skills, or experience (carrer history)
   the candidate score is penalized depending on the inconsistency. Then cross encoder reranking
   is performed with processed JD text and processed candidate texts.
+  Embedder used is BAAI/bge-small-en-v1.5 and cross encoder is ms-marco-MiniML-L-12-v2. 
   The final score is the weighted aggregation of all the scores and penalties and accumulated
   reasoning features are materialized into the final reasoning.
 
