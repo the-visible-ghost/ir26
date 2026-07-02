@@ -74,7 +74,8 @@ ai_usage_summary: |
   - "To discuss about different sentence transformers, cross encoders,
       pros and cons for different models and approches and stuff"
   - "To write general concrete functions.
-      ChatGPT was not used to write architecture specific code"
+      Was not used to write ranking architecture specific code"
+  - "Was prompted to write reasoning code but not discuss reasoning specific architecture"
 
 # ============================================================================
 # Approach summary (optional but recommended)

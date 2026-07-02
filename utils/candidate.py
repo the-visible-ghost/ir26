@@ -514,8 +514,3 @@ class Candidate(msgspec.Struct):
                 f"{ai_skills} AI core skills; "
                 f"response rate {r.recruiter_response_rate:.0%}."
             )
-
-
-def capex(s: str) -> str:
-    # Capitalize first letter of string.
-    return s[0].upper() + s[1:] if s else s
