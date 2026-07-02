@@ -11,7 +11,7 @@ that will work in Linux and BSD based Operating Systems.
 ## 1. Cloning the Repository
 Clone the repository using the command below.
 ```bash
-git clone https://github.com/the-visible-ghost/India-Runs-2026.git
+git clone https://github.com/the-visible-ghost/ir26.git
 ```
 Change current working directory to the repository root using the command below.
 ```bash
