@@ -15,7 +15,7 @@ git clone https://github.com/the-visible-ghost/ir26.git
 ```
 Change current working directory to the repository root using the command below.
 ```bash
-cd India-Runs-2026
+cd ir26
 ```
 
 ## 2. Creating a virtual environment.
