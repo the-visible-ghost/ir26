@@ -1,5 +1,5 @@
 """
-Wrapper for Candidate JSON-Object with Robust Reason Generation
+Wrapper for Candidate JSON-Object with Reason Generation
 """
 
 from typing import Dict, List, Literal, Optional, Tuple
@@ -35,15 +35,10 @@ type CandidateEmbedData = Dict[
 vowels = ("a", "e", "i", "o", "u")
 
 
-# =============================================================================
 # Reason Feature Accumulator
-# =============================================================================
-# This class collects features during scoring to build a rich, contextual reason
 
 
 class ReasonFeatures:
-    """Accumulates features during scoring for robust reason generation."""
-
     def __init__(self):
         # Match quality
         self.match_score: float = 0.0
@@ -242,15 +237,9 @@ class Candidate(msgspec.Struct):
             f"Experience: {', '.join(embed_data['experience'])}."
         )
 
-    # =============================================================================
-    # ROBUST REASON GENERATOR
-    # =============================================================================
+    # REASON GENERATION -------------------------------------------------------------
 
     def _analyze_career_trajectory(self) -> Tuple[str, Dict]:
-        """
-        Analyze career trajectory to detect gaps, pivots, transitions.
-        Returns: (trajectory_type, trajectory_details)
-        """
         career = self.career_history
         if not career:
             return "unknown", {}
@@ -307,10 +296,6 @@ class Candidate(msgspec.Struct):
         return "stable", details
 
     def _analyze_skill_sources(self) -> Tuple[str, List[str]]:
-        """
-        Determine where skills come from: current job, past jobs, or self-taught.
-        Returns: (source_type, evidence_list)
-        """
         career = self.career_history
         skills = self.skills
 
@@ -366,9 +351,6 @@ class Candidate(msgspec.Struct):
     def _classify_mismatch(
         self, penalty: float, penalty_breakdown: Dict[str, float]
     ) -> str:
-        """
-        Classify the type of mismatch to determine if it's a honeypot or genuine transition.
-        """
         if penalty < 0.2:
             return "none"
 
@@ -411,10 +393,6 @@ class Candidate(msgspec.Struct):
         return "minor"
 
     def _build_reason(self, features: ReasonFeatures) -> str:
-        """
-        Generate a human-readable sentence explaining why this candidate was ranked.
-        Answers: "Why is this person here?" and "What do they bring?"
-        """
         p = self.profile
         r = self.redrob_signals
         career = self.career_history
@@ -488,12 +466,6 @@ class Candidate(msgspec.Struct):
 
     @property
     def reason(self) -> str:
-        """
-        Generate a robust, context-aware reason for why this candidate was ranked.
-
-        If reason features were accumulated during scoring, use them for a rich reason.
-        Otherwise, fall back to a basic analysis.
-        """
         if self._reason_features is not None:
             return self._build_reason(self._reason_features)
 
@@ -545,5 +517,5 @@ class Candidate(msgspec.Struct):
 
 
 def capex(s: str) -> str:
-    """Capitalize first letter of string."""
+    # Capitalize first letter of string.
     return s[0].upper() + s[1:] if s else s

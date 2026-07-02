@@ -119,17 +119,6 @@ def rerank(query: str, model, candis: List[Candidate]):
 
 
 def score_candidate(candi):
-    """
-    Score a candidate and accumulate reason features for robust reason generation.
-
-    NOTE: This function signature has changed. It now takes only the candidate wrapper dict
-    and accesses both the candidate object and its embedded vectors internally.
-
-    The scoring data (retrieval results) should be pre-computed and stored in the wrapper.
-
-    Returns: total_score (float)
-    Side effect: populates candidate._reason_features
-    """
     candidate = candi["candidate"]
     data = candi.get("retrieval_data", {})
 
